@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>다온 vs 유주: 저스트 가드 & 다이나믹 카메라</title>
+    <title>다온 vs 유주: 배구 게임</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
 
@@ -29,39 +29,27 @@
             position: absolute; top: 20px; left: 0; width: 100%;
             text-align: center; pointer-events: none;
             text-shadow: 3px 3px 0 #000;
+            z-index: 50;
         }
 
-        /* ▼▼▼ [추가된 버튼 스타일] ▼▼▼ */
-        .home-btn {
-            position: absolute;
-            top: 10px; 
-            left: 30px;
-            padding: 10px 25px;
+        /* 버튼 그룹 스타일 */
+        .btn-group {
+            position: absolute; top: 10px; left: 30px;
+            display: flex; gap: 10px; pointer-events: auto;
+        }
+
+        .ui-btn {
+            padding: 8px 15px;
             font-family: 'Black Han Sans', sans-serif;
-            font-size: 1.5rem;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 30px; /* 둥근 캡슐 모양 */
-            cursor: pointer;
-            z-index: 100;
-            pointer-events: auto; /* 부모의 none 속성 무시하고 클릭 가능 */
+            font-size: 1.2rem; color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px; cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            text-shadow: 2px 2px 0 #000;
+            text-shadow: 1px 1px 0 #000;
         }
-
-        .home-btn:hover {
-            background-color: #ff5e62; /* 호버 시 네온 핑크/레드 계열 */
-            border-color: #fff;
-            transform: scale(1.1);
-            box-shadow: 0 0 15px #ff5e62;
-        }
-
-        .home-btn:active {
-            transform: scale(0.95);
-        }
-        /* ▲▲▲ [추가된 버튼 스타일 끝] ▲▲▲ */
+        .ui-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.2); }
+        .home-btn:hover { border-color: #ff5e62; box-shadow: 0 0 10px #ff5e62; }
 
         .score-box {
             font-size: 4rem; color: #fff;
@@ -87,41 +75,32 @@
         }
 
         .controls {
-            margin-top: 20px; width: 1400px;
-            padding: 15px 0;
+            margin-top: 20px; width: 1400px; padding: 15px 0;
             background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
-            border-radius: 15px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             border: 2px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .key-row {
-            font-size: 1.3rem; margin-bottom: 10px; color: #ddd;
-            text-shadow: 1px 1px 2px #000;
-        }
+        .key-row { font-size: 1.3rem; margin-bottom: 10px; color: #ddd; text-shadow: 1px 1px 2px #000; }
 
         .key-btn {
             display: inline-block; padding: 2px 8px;
             border: 2px solid #aaa; border-radius: 6px;
             background: rgba(255,255,255,0.15);
             font-family: monospace; font-weight: bold; color: #fff;
-            box-shadow: 0 3px 0 #555;
-            margin: 0 2px;
+            box-shadow: 0 3px 0 #555; margin: 0 2px;
         }
 
         .smash-row {
-            font-size: 1.8rem; color: #FFD700;
-            margin-top: 5px;
+            font-size: 1.5rem; color: #FFD700; margin-top: 5px;
             text-shadow: 0 0 10px #FF4500, 2px 2px 0 #000;
             animation: pulseText 1.5s ease-in-out infinite;
         }
         
         .mode-indicator {
             position: absolute; bottom: 20px; right: 20px;
-            font-size: 1.5rem; color: #00FF00;
-            text-shadow: 0 0 5px #000;
+            font-size: 1.5rem; color: #00FF00; text-shadow: 0 0 5px #000;
             font-family: Arial, sans-serif;
         }
 
@@ -136,9 +115,10 @@
 
     <div class="game-container">
         <div class="ui-layer">
-            <button class="home-btn" onclick="location.href='index.html'">
-                🏠 메인으로
-            </button>
+            <div class="btn-group">
+                <button class="ui-btn home-btn" onclick="location.href='index.html'">🏠 메인으로</button>
+            </div>
+            
             <div class="score-box">
                 <span class="score-p1" id="scoreP1">0</span> : <span class="score-p2" id="scoreP2">0</span>
             </div>
@@ -151,14 +131,15 @@
     <div class="controls">
         <div class="key-row">
             <span style="color:#00d2ff">P1</span>: 
-            <span class="key-btn">W</span><span class="key-btn">A</span><span class="key-btn">D</span> 이동 
-            + <span class="key-btn" style="border-color:#00d2ff; color:#00d2ff">S</span> 스매시
+            W,A,D 이동 + <span class="key-btn">S</span> 스매시/방어
+            + <span class="key-btn" style="background:#00d2ff; border-color:#fff">Shift</span> 필살기
             &nbsp;&nbsp;|&nbsp;&nbsp; 
-            <span style="color:#ff5e62">P2 (AI)</span>: 
-            <span id="p2-control-text">자동 플레이 중... 🤖</span>
+            <span style="color:#ff5e62">P2</span>: 
+            방향키 이동 + <span class="key-btn">↓</span> 스매시/방어
+            + <span class="key-btn" style="background:#ff5e62; border-color:#fff">Enter</span> 필살기
         </div>
         <div class="smash-row">
-            ★ S(↓)키로 타이밍 맞춰 방어하면 '저스트 가드' 발동! ★
+            ★ S(↓)키를 공이 닿는 순간 '탁!' 눌러야 방어 성공! (미리 누르고 있으면 뚫림) ★
         </div>
     </div>
 
@@ -178,6 +159,15 @@
                 keys[p2.controls.down] = false;
 
                 if (gameState !== 'playing' || cinematicTimer > 0) return;
+                
+                // [AI 스킬 사용]
+                // 쿨타임이 찼고, 공이 살아있으면 1.5% 확률로 사용 (위급할 때 확률 UP)
+                if (p2.skillCooldown <= 0 && Math.random() < 0.015) {
+                    if (ball.x > 700 || Math.abs(ball.x - p2.x) < 150) {
+                        p2.useSkill();
+                    }
+                }
+
                 if (ball.isRising || ball.isHolding) return;
 
                 const ballInMySide = ball.x > 700; 
@@ -221,309 +211,95 @@
                      }
                 }
 
+                // AI 스매시/가드 로직 (AI는 타이밍을 잘 맞춤)
                 if (p2.isJumping) {
                     if (ball.y < p2.y + 50 && distX < 60) {
                         keys[p2.controls.down] = true; 
                     }
                 }
-                // 저스트 가드 AI (공이 빠르고 가까울 때)
+                
                 if (ballInMySide && (ball.isSuperSmash || ball.isFireShot) && distX < 60 && ballHeight > p2.y - 50) {
+                     // AI는 0.2초 정도 늦게 반응하도록 할 수도 있지만, 일단은 칼방어
                      keys[p2.controls.down] = true; 
                 }
             }
         }
-        // ------------------------------------
-
-        // ★ [1. 다이나믹 카메라 객체]
+        
         const camera = {
-            x: 0,
-            y: 0,
-            zoom: 1,
+            x: 0, y: 0, zoom: 1,
             update: function(ball) {
-                let targetZ = 1.0;
-                let targetX = 0;
-                let targetY = 0;
-
-                // 액션 상황(스매시, 불꽃슛, 필살기 시전 등)에서 줌인
+                let targetZ = 1.0; let targetX = 0; let targetY = 0;
                 if (ball.isSuperSmash || ball.isFireShot || ball.isRising || ball.isHolding) {
-                    targetZ = 1.15; // 1.15배 줌인
-                    // 카메라는 공을 약간 따라감 (제한적)
-                    targetX = (700 - ball.x) * 0.2; 
-                    targetY = (400 - ball.y) * 0.2;
-                } else {
-                    targetZ = 1.0;
-                    targetX = 0;
-                    targetY = 0;
+                    targetZ = 1.15; targetX = (700 - ball.x) * 0.2; targetY = (400 - ball.y) * 0.2;
                 }
-
-                // 부드러운 전환 (Linear Interpolation)
                 this.zoom += (targetZ - this.zoom) * 0.05;
                 this.x += (targetX - this.x) * 0.05;
                 this.y += (targetY - this.y) * 0.05;
             },
             apply: function(ctx) {
-                // 화면 중심 기준으로 줌인
-                ctx.translate(700, 400);
-                ctx.scale(this.zoom, this.zoom);
-                ctx.translate(-700 + this.x, -400 + this.y);
+                ctx.translate(700, 400); ctx.scale(this.zoom, this.zoom); ctx.translate(-700 + this.x, -400 + this.y);
             }
         };
 
-        // CLASS DEFINITIONS
+        // ... [이펙트 클래스들은 유지] ...
         class Reaction {
-            constructor(x, y, emoji) {
-                this.x = x; this.y = y; this.emoji = emoji;
-                this.life = 60; this.vy = -2;
-            }
+            constructor(x, y, emoji) { this.x = x; this.y = y; this.emoji = emoji; this.life = 60; this.vy = -2; }
             update() { this.y += this.vy; this.life--; }
-            draw() {
-                if(this.life <= 0) return;
-                ctx.save(); ctx.globalAlpha = this.life / 60;
-                ctx.font = "50px Arial"; ctx.textAlign = "center";
-                ctx.fillText(this.emoji, this.x, this.y);
-                ctx.restore();
-            }
+            draw() { if(this.life <= 0) return; ctx.save(); ctx.globalAlpha = this.life / 60; ctx.font = "50px Arial"; ctx.textAlign = "center"; ctx.fillText(this.emoji, this.x, this.y); ctx.restore(); }
         }
-
         class HitText {
-            constructor(x, y, text, color) {
-                this.x = x; this.y = y;
-                this.text = text; this.color = color;
-                this.life = 40; 
-                this.size = 40; 
-                this.rotation = (Math.random() - 0.5) * 0.5; 
-            }
-            update() {
-                this.y -= 1.5; this.life--; this.size += 0.2;
-            }
-            draw() {
-                if(this.life <= 0) return;
-                ctx.save(); 
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                ctx.globalAlpha = this.life / 40;
-                ctx.font = `bold ${this.size}px 'Black Han Sans', sans-serif`;
-                ctx.textAlign = "center"; ctx.fillStyle = this.color;
-                ctx.strokeStyle = "white"; ctx.lineWidth = 4;
-                ctx.strokeText(this.text, 0, 0);
-                ctx.fillText(this.text, 0, 0);
-                ctx.restore();
-            }
+            constructor(x, y, text, color) { this.x = x; this.y = y; this.text = text; this.color = color; this.life = 40; this.size = 40; this.rotation = (Math.random() - 0.5) * 0.5; }
+            update() { this.y -= 1.5; this.life--; this.size += 0.2; }
+            draw() { if(this.life <= 0) return; ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation); ctx.globalAlpha = this.life / 40; ctx.font = `bold ${this.size}px 'Black Han Sans'`; ctx.textAlign = "center"; ctx.fillStyle = this.color; ctx.strokeStyle = "white"; ctx.lineWidth = 4; ctx.strokeText(this.text, 0, 0); ctx.fillText(this.text, 0, 0); ctx.restore(); }
         }
-
         class Confetti {
-            constructor() {
-                this.x = Math.random() * 1400; this.y = Math.random() * -800;
-                this.vx = (Math.random() - 0.5) * 4; this.vy = Math.random() * 5 + 3;
-                this.color = `hsl(${Math.random()*360}, 100%, 50%)`;
-                this.size = Math.random() * 15 + 5;
-                this.rotation = Math.random() * 360; this.rotationSpeed = (Math.random() - 0.5) * 10;
-            }
+            constructor() { this.x = Math.random() * 1400; this.y = Math.random() * -800; this.vx = (Math.random() - 0.5) * 4; this.vy = Math.random() * 5 + 3; this.color = `hsl(${Math.random()*360}, 100%, 50%)`; this.size = Math.random() * 15 + 5; this.rotation = Math.random() * 360; this.rotationSpeed = (Math.random() - 0.5) * 10; }
             update() { this.y += this.vy; this.x += this.vx; this.rotation += this.rotationSpeed; if(this.y > 800) this.y = -50; }
-            draw() {
-                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation * Math.PI / 180);
-                ctx.fillStyle = this.color; ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size); ctx.restore();
-            }
+            draw() { ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation * Math.PI / 180); ctx.fillStyle = this.color; ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size); ctx.restore(); }
         }
-
         class Dust {
-            constructor(x, y) {
-                this.x = x; this.y = y;
-                this.vx = (Math.random() - 0.5) * 2;
-                this.vy = (Math.random() - 0.5) * 2 - 1; 
-                this.size = Math.random() * 8 + 4;
-                this.life = 1.0;
-                this.color = `rgba(200, 190, 180, 0.6)`; 
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                this.life -= 0.05; this.size *= 0.95;
-            }
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = this.color;
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
-                ctx.restore();
-            }
+            constructor(x, y) { this.x = x; this.y = y; this.vx = (Math.random() - 0.5) * 2; this.vy = (Math.random() - 0.5) * 2 - 1; this.size = Math.random() * 8 + 4; this.life = 1.0; this.color = `rgba(200, 190, 180, 0.6)`; }
+            update() { this.x += this.vx; this.y += this.vy; this.life -= 0.05; this.size *= 0.95; }
+            draw() { ctx.save(); ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
         }
-
         class InkSplotch {
-            constructor() {
-                this.x = Math.random() * 1400;
-                this.y = Math.random() * 800;
-                this.size = Math.random() * 100 + 150;
-                this.life = 420; 
-                this.scale = 0;
-                this.maxScale = 1;
-            }
-            update() {
-                if (this.scale < this.maxScale) this.scale += 0.1;
-                this.life--;
-            }
-            draw() {
-                if (this.life <= 0) return;
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.scale(this.scale, this.scale);
-                ctx.globalAlpha = Math.min(1, this.life / 60);
-                ctx.fillStyle = "black";
-                ctx.beginPath(); ctx.arc(0, 0, this.size/2, 0, Math.PI * 2); ctx.fill();
-                for(let i=0; i<5; i++) {
-                    ctx.beginPath();
-                    ctx.arc(Math.cos(i)*this.size/2, Math.sin(i)*this.size/2, this.size/5, 0, Math.PI*2);
-                    ctx.fill();
-                }
-                ctx.restore();
-            }
+            constructor() { this.x = Math.random() * 1400; this.y = Math.random() * 800; this.size = Math.random() * 100 + 150; this.life = 420; this.scale = 0; this.maxScale = 1; }
+            update() { if (this.scale < this.maxScale) this.scale += 0.1; this.life--; }
+            draw() { if (this.life <= 0) return; ctx.save(); ctx.translate(this.x, this.y); ctx.scale(this.scale, this.scale); ctx.globalAlpha = Math.min(1, this.life / 60); ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(0, 0, this.size/2, 0, Math.PI * 2); ctx.fill(); for(let i=0; i<5; i++) { ctx.beginPath(); ctx.arc(Math.cos(i)*this.size/2, Math.sin(i)*this.size/2, this.size/5, 0, Math.PI*2); ctx.fill(); } ctx.restore(); }
         }
-
         class FakeBall {
-            constructor(x, y, color) {
-                this.x = x; this.y = y;
-                this.vx = 0; this.vy = 0;
-                this.radius = BALL_R; this.color = color;
-                this.active = true;
-                this.trail = [];
-            }
-            update() {
-                if (!this.active) return;
-                this.vy += GRAVITY; this.x += this.vx; this.y += this.vy;
-                
-                this.trail.push({x: this.x, y: this.y, r: this.radius * 0.8});
-                if(this.trail.length > 10) this.trail.shift();
-
-                if (this.x < this.radius || this.x > 1400 - this.radius) this.vx *= -0.8;
-                if (this.y > GROUND_Y - this.radius) {
-                    this.active = false; createExplosion(this.x, this.y, this.color); 
-                }
-                if(Math.random() < 0.3) particles.push(new Particle(this.x, this.y, "#FF4500", true));
-            }
-            draw() {
-                if (!this.active) return;
-                
-                if (this.trail.length > 1) {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'lighter';
-                    ctx.beginPath();
-                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
-                    for(let t of this.trail) ctx.lineTo(t.x, t.y);
-                    ctx.strokeStyle = "rgba(255, 69, 0, 0.5)";
-                    ctx.lineWidth = 15;
-                    ctx.lineCap = 'round';
-                    ctx.stroke();
-                    ctx.restore();
-                }
-
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
-                ctx.fillStyle = this.color; ctx.globalAlpha = 0.8; ctx.fill(); 
-                ctx.lineWidth = 4; ctx.strokeStyle = "#333"; ctx.stroke();
-                
-                ctx.shadowBlur = 20; ctx.shadowColor = "red";
-                ctx.beginPath(); ctx.arc(this.x - 10, this.y - 10, 8, 0, Math.PI*2);
-                ctx.fillStyle = "rgba(255,255,255,0.6)"; ctx.fill(); 
-                ctx.shadowBlur = 0;
-            }
+            constructor(x, y, color) { this.x = x; this.y = y; this.vx = 0; this.vy = 0; this.radius = BALL_R; this.color = color; this.active = true; this.trail = []; }
+            update() { if (!this.active) return; this.vy += GRAVITY; this.x += this.vx; this.y += this.vy; this.trail.push({x: this.x, y: this.y, r: this.radius * 0.8}); if(this.trail.length > 10) this.trail.shift(); if (this.x < this.radius || this.x > 1400 - this.radius) this.vx *= -0.8; if (this.y > GROUND_Y - this.radius) { this.active = false; createExplosion(this.x, this.y, this.color); } if(Math.random() < 0.3) particles.push(new Particle(this.x, this.y, "#FF4500", true)); }
+            draw() { if (!this.active) return; if (this.trail.length > 1) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.beginPath(); ctx.moveTo(this.trail[0].x, this.trail[0].y); for(let t of this.trail) ctx.lineTo(t.x, t.y); ctx.strokeStyle = "rgba(255, 69, 0, 0.5)"; ctx.lineWidth = 15; ctx.lineCap = 'round'; ctx.stroke(); ctx.restore(); } ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fillStyle = this.color; ctx.globalAlpha = 0.8; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = "#333"; ctx.stroke(); }
         }
-
+        
+        // Item 클래스 (기존 유지 + 스킬용 아이템 효과와 구분)
         class Item {
             constructor() {
-                this.x = Math.random() * (1400 - 100) + 50; 
-                this.y = -50; 
-                this.vy = 2.5; 
-                this.size = 40; 
-                this.active = true;
-                
+                this.x = Math.random() * (1400 - 100) + 50; this.y = -50; this.vy = 2.5; this.size = 40; this.active = true;
                 const rand = Math.random();
-                if (rand < 0.08) this.type = 'FIRE'; 
-                else if (rand < 0.13) this.type = 'BANANA'; 
-                else if (rand < 0.18) this.type = 'POOP'; 
-                else if (rand < 0.23) this.type = 'ICE';  
-                else if (rand < 0.28) this.type = 'CONFUSION'; 
-                else if (rand < 0.33) this.type = 'GIANT'; 
-                else if (rand < 0.38) this.type = 'DWARF'; 
-                else if (rand < 0.43) this.type = 'SPEED'; 
-                else if (rand < 0.48) this.type = 'JUMP'; 
-                else if (rand < 0.53) this.type = 'BIG'; 
-                else if (rand < 0.58) this.type = 'BONUS';
-                else if (rand < 0.63) this.type = 'BOMB';     
-                else if (rand < 0.68) this.type = 'BLACKOUT'; 
-                else if (rand < 0.73) this.type = 'TYPHOON';  
-                else if (rand < 0.78) this.type = 'GHOST';
-                else if (rand < 0.83) this.type = 'INK'; 
-                else if (rand < 0.88) this.type = 'CLONE';
-                else if (rand < 0.93) this.type = 'WALL';
-                else this.type = 'CHICKEN';
+                if (rand < 0.08) this.type = 'FIRE'; else if (rand < 0.13) this.type = 'BANANA'; else if (rand < 0.18) this.type = 'POOP'; else if (rand < 0.23) this.type = 'ICE';  else if (rand < 0.28) this.type = 'CONFUSION'; else if (rand < 0.33) this.type = 'GIANT'; else if (rand < 0.38) this.type = 'DWARF'; else if (rand < 0.43) this.type = 'SPEED'; else if (rand < 0.48) this.type = 'JUMP'; else if (rand < 0.53) this.type = 'BIG'; 
+                else if (rand < 0.58) { if (score.p1 >= WIN_SCORE - 1 || score.p2 >= WIN_SCORE - 1) this.type = 'BANANA'; else this.type = 'BONUS'; }
+                else if (rand < 0.63) this.type = 'BOMB'; else if (rand < 0.68) this.type = 'BLACKOUT'; else if (rand < 0.73) this.type = 'TYPHOON'; else if (rand < 0.78) this.type = 'GHOST'; else if (rand < 0.83) this.type = 'INK'; else if (rand < 0.88) this.type = 'CLONE'; else if (rand < 0.93) this.type = 'WALL'; else this.type = 'CHICKEN';
             }
-            
-            draw() {
-                if (!this.active) return;
-                let icon = ""; let bgColor = ""; let borderColor = "white";
-                
-                if (this.type === 'FIRE') { icon = "🔥"; bgColor = "#FF4500"; borderColor = "#FFFF00"; }
-                else if (this.type === 'BANANA') { icon = "🍌"; bgColor = "#FFFF00"; borderColor = "#FFA500"; }
-                else if (this.type === 'POOP') { icon = "💩"; bgColor = "#8B4513"; borderColor = "#A0522D"; }
-                else if (this.type === 'GIANT') { icon = "🍄"; bgColor = "#FF0000"; borderColor = "#FFFFFF"; }
-                else if (this.type === 'DWARF') { icon = "👶"; bgColor = "#87CEEB"; borderColor = "#0000FF"; }
-                else if (this.type === 'ICE') { icon = "❄️"; bgColor = "#00BFFF"; borderColor = "#FFFFFF"; }
-                else if (this.type === 'CONFUSION') { icon = "😵"; bgColor = "#8A2BE2"; borderColor = "#FF00FF"; }
-                else if (this.type === 'SPEED') { icon = "⚡"; bgColor = "#0044FF"; borderColor = "#00FFFF"; }
-                else if (this.type === 'JUMP') { icon = "🚀"; bgColor = "#00aa00"; borderColor = "#00FF00"; }
-                else if (this.type === 'BIG') { icon = "🏐"; bgColor = "#FF6347"; borderColor = "#FFaaaa"; }
-                else if (this.type === 'BONUS') { icon = "💎"; bgColor = "#6600CC"; borderColor = "#EE82EE"; }
-                else if (this.type === 'BOMB') { icon = "💣"; bgColor = "#333333"; borderColor = "#FF0000"; }
-                else if (this.type === 'BLACKOUT') { icon = "🌑"; bgColor = "#000000"; borderColor = "#555555"; }
-                else if (this.type === 'TYPHOON') { icon = "🌪️"; bgColor = "#AAAAAA"; borderColor = "#FFFFFF"; }
-                else if (this.type === 'GHOST') { icon = "👻"; bgColor = "#FFFFFF"; borderColor = "#AAAAAA"; }
-                else if (this.type === 'INK') { icon = "🦑"; bgColor = "#000000"; borderColor = "#444444"; }
-                else if (this.type === 'CLONE') { icon = "🤥"; bgColor = "#FF69B4"; borderColor = "#FFFFFF"; }
-                else if (this.type === 'WALL') { icon = "🧱"; bgColor = "#8B4513"; borderColor = "#CCCCCC"; }
-                else if (this.type === 'CHICKEN') { icon = "🐔"; bgColor = "#FFD700"; borderColor = "#FF0000"; }
-
-                ctx.save(); ctx.translate(this.x, this.y);
-                ctx.beginPath(); ctx.arc(0, 0, 35, 0, Math.PI * 2); ctx.fillStyle = borderColor; ctx.fill();
-                ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.fillStyle = bgColor; ctx.fill();
-                ctx.font = "35px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "white";
-                ctx.fillText(icon, 0, 2); ctx.restore();
+            draw() { if (!this.active) return; let icon = ""; let bgColor = ""; let borderColor = "white";
+                if (this.type === 'FIRE') { icon = "🔥"; bgColor = "#FF4500"; borderColor = "#FFFF00"; } else if (this.type === 'BANANA') { icon = "🍌"; bgColor = "#FFFF00"; borderColor = "#FFA500"; } else if (this.type === 'POOP') { icon = "💩"; bgColor = "#8B4513"; borderColor = "#A0522D"; } else if (this.type === 'GIANT') { icon = "🍄"; bgColor = "#FF0000"; borderColor = "#FFFFFF"; } else if (this.type === 'DWARF') { icon = "👶"; bgColor = "#87CEEB"; borderColor = "#0000FF"; } else if (this.type === 'ICE') { icon = "❄️"; bgColor = "#00BFFF"; borderColor = "#FFFFFF"; } else if (this.type === 'CONFUSION') { icon = "😵"; bgColor = "#8A2BE2"; borderColor = "#FF00FF"; } else if (this.type === 'SPEED') { icon = "⚡"; bgColor = "#0044FF"; borderColor = "#00FFFF"; } else if (this.type === 'JUMP') { icon = "🚀"; bgColor = "#00aa00"; borderColor = "#00FF00"; } else if (this.type === 'BIG') { icon = "🏐"; bgColor = "#FF6347"; borderColor = "#FFaaaa"; } else if (this.type === 'BONUS') { icon = "💎"; bgColor = "#6600CC"; borderColor = "#EE82EE"; } else if (this.type === 'BOMB') { icon = "💣"; bgColor = "#333333"; borderColor = "#FF0000"; } else if (this.type === 'BLACKOUT') { icon = "🌑"; bgColor = "#000000"; borderColor = "#555555"; } else if (this.type === 'TYPHOON') { icon = "🌪️"; bgColor = "#AAAAAA"; borderColor = "#FFFFFF"; } else if (this.type === 'GHOST') { icon = "👻"; bgColor = "#FFFFFF"; borderColor = "#AAAAAA"; } else if (this.type === 'INK') { icon = "🦑"; bgColor = "#000000"; borderColor = "#444444"; } else if (this.type === 'CLONE') { icon = "🤥"; bgColor = "#FF69B4"; borderColor = "#FFFFFF"; } else if (this.type === 'WALL') { icon = "🧱"; bgColor = "#8B4513"; borderColor = "#CCCCCC"; } else if (this.type === 'CHICKEN') { icon = "🐔"; bgColor = "#FFD700"; borderColor = "#FF0000"; }
+                ctx.save(); ctx.translate(this.x, this.y); ctx.beginPath(); ctx.arc(0, 0, 35, 0, Math.PI * 2); ctx.fillStyle = borderColor; ctx.fill(); ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.fillStyle = bgColor; ctx.fill(); ctx.font = "35px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "white"; ctx.fillText(icon, 0, 2); ctx.restore();
             }
             update() { if (!this.active) return; this.y += this.vy; if (this.y > GROUND_Y) this.active = false; }
         }
-
         class Particle {
-            constructor(x, y, color, isSmoke = false) {
-                this.x = x; this.y = y;
-                this.vx = (Math.random() - 0.5) * 15; 
-                this.vy = (Math.random() - 0.5) * 15;
-                this.life = 1.0; this.color = color; 
-                this.isSmoke = isSmoke;
-                this.size = Math.random() * 10 + 5; 
-                if (isSmoke) {
-                    this.vx *= 0.5; this.vy = -Math.random() * 3 - 1; // 연기는 위로
-                    this.size *= 1.5;
-                    this.life = 0.8;
-                }
-            }
-            update() { 
-                this.x += this.vx; this.y += this.vy; 
-                this.life -= 0.02; 
-                this.size *= 0.96; 
-            }
-            draw() { 
-                ctx.save();
-                ctx.globalCompositeOperation = this.isSmoke ? 'source-over' : 'lighter'; 
-                ctx.globalAlpha = this.life; 
-                ctx.fillStyle = this.color; 
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); 
-                ctx.restore();
-            }
+            constructor(x, y, color, isSmoke = false) { this.x = x; this.y = y; this.vx = (Math.random() - 0.5) * 15; this.vy = (Math.random() - 0.5) * 15; this.life = 1.0; this.color = color; this.isSmoke = isSmoke; this.size = Math.random() * 10 + 5; if (isSmoke) { this.vx *= 0.5; this.vy = -Math.random() * 3 - 1; this.size *= 1.5; this.life = 0.8; } }
+            update() { this.x += this.vx; this.y += this.vy; this.life -= 0.02; this.size *= 0.96; }
+            draw() { ctx.save(); ctx.globalCompositeOperation = this.isSmoke ? 'source-over' : 'lighter'; ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
         }
-
         class Shockwave {
             constructor(x, y, color) { this.x = x; this.y = y; this.radius = 20; this.alpha = 1.0; this.lineWidth = 15; this.color = color; }
             update() { this.radius += 20; this.alpha -= 0.05; this.lineWidth *= 0.9; }
             draw() { if (this.alpha <= 0) return; ctx.save(); ctx.globalAlpha = this.alpha; ctx.strokeStyle = this.color; ctx.lineWidth = this.lineWidth; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
         }
 
+        // --- [Player 클래스 수정: 스킬 및 가드 로직] ---
         class Player {
             constructor(x, charInfo, controls, side) {
                 this.x = x; this.y = GROUND_Y - DISPLAY_H;
@@ -547,6 +323,7 @@
                 this.isJumpSmash = false;
                 this.isSmashHit = false;
                 this.chickenTimer = 0;
+                this.isGoldenChicken = false; 
                 
                 this.emoji = "";
                 this.emojiTimer = 0;
@@ -560,244 +337,243 @@
                 this.hasJumpBuff = false; 
                 
                 this.fireMultiBallTimer = 0;
+
+                // ▼ [추가] 스킬 및 방어 로직 변수 ▼
+                this.skillCooldown = 0;
+                this.maxSkillCooldown = 1200; // 20초 (기존 10초에서 증가)
+                this.skillName = "";
+                this.setSkillName();
+                this.guardPressTimer = 0; // 방어 키 홀드 감지용
             }
             
-            setEmoji(emoji) {
-                this.emoji = emoji;
-                this.emojiTimer = 120; 
+            setSkillName() {
+                if (this.name === "다온") this.skillName = "잼민이의 떼쓰기";
+                else if (this.name === "유주") this.skillName = "난쟁이의 저주"; // [수정] 스킬 이름 변경
+                else if (this.name === "엄마") this.skillName = "공포의 분신술";
+                else if (this.name === "아빠") this.skillName = "법인카드 긁기";
+                else if (this.name === "돈까스할매") this.skillName = "무한 리필";
+                else if (this.name === "근육할배") this.skillName = "나 때는 말이야";
             }
+
+            useSkill() {
+                if (this.skillCooldown > 0 || gameState !== 'playing') return;
+                this.skillCooldown = this.maxSkillCooldown;
+                const opponent = this.side === 'left' ? p2 : p1;
+
+                giantSound.currentTime = 0; giantSound.play().catch(()=>{});
+
+                if (this.name === "다온") {
+                    showItemNotice(`😫 ${this.skillName}! (상대 점프 불가)`);
+                    opponent.vy += 15; opponent.isJumping = false;
+                    opponent.poopTimer = 240; // 무겁게 만듦
+                } else if (this.name === "유주") {
+                    // [수정] 유주 스킬: 난쟁이의 저주 (상대방 축소)
+                    showItemNotice(`👶 ${this.skillName}! (상대방 쪼꼬미)`);
+                    dwarfSound.currentTime = 0; dwarfSound.play().catch(()=>{});
+                    opponent.scale = 0.5;
+                    setTimeout(() => { opponent.scale = 1.0; }, 8000); // 8초 후 복구
+                } else if (this.name === "엄마") {
+                    showItemNotice(`🤱 ${this.skillName}! (진짜는 어디?)`);
+                    ghostSound.currentTime = 0; ghostSound.play().catch(()=>{});
+                    
+                    for(let i=0; i<8; i++) {
+                        let fb = new FakeBall(ball.x, ball.y, ball.color);
+                        fb.vx = (Math.random() - 0.5) * 25; 
+                        fb.vy = (Math.random() - 0.5) * 25;
+                        fakeBalls.push(fb);
+                    }
+                    createExplosion(ball.x, ball.y, "#FF69B4");
+                } else if (this.name === "아빠") {
+                    showItemNotice(`💳 ${this.skillName}! (공 투명)`);
+                    ghostBallTimer = 240;
+                } else if (this.name === "돈까스할매") {
+                    showItemNotice(`🍛 ${this.skillName}! (공 거대화)`);
+                    ball.mushroomCount = 2; ball.radius = 105; ball.mass = 1.6; ball.color = "#FF4500";
+                    if (bigBallTimer) clearTimeout(bigBallTimer);
+                    bigBallTimer = setTimeout(() => { ball.radius = 35; ball.mass = 1; ball.color = ball.defaultColor; ball.mushroomCount = 0; }, 5000);
+                } else if (this.name === "근육할배") {
+                    showItemNotice(`🐴 ${this.skillName}... (시간 감속)`);
+                    slowMotionTimer = 300;
+                }
+            }
+            
+            setEmoji(emoji) { this.emoji = emoji; this.emojiTimer = 120; }
 
             update() {
                 if (gameState === 'gameover') {
-                    if (this.y < GROUND_Y - DISPLAY_H) { this.vy += GRAVITY; this.y += this.vy; }
-                    else { this.y = GROUND_Y - DISPLAY_H; }
-                    if (this.side === winnerSide) {
-                        if(frameCount % 40 === 0) { this.vy = -8; }
-                        this.y += this.vy;
-                    } 
-                    return;
+                    if (this.y < GROUND_Y - DISPLAY_H) { this.vy += GRAVITY; this.y += this.vy; } else { this.y = GROUND_Y - DISPLAY_H; }
+                    if (this.side === winnerSide) { if(frameCount % 40 === 0) { this.vy = -8; } this.y += this.vy; } return;
                 }
-
                 if (gameState !== 'playing') return;
-                
                 if (cinematicTimer > 0) return;
 
-                if (this.chickenTimer > 0) this.chickenTimer--; 
+                // ▼ 스킬 쿨타임 감소
+                if (this.skillCooldown > 0) this.skillCooldown--;
                 
-                if (this.emojiTimer > 0) {
-                    this.emojiTimer--;
-                } else {
-                    this.emoji = "";
-                }
+                // ▼ 방어 키 홀드 체크 (Just Guard)
+                if (keys[this.controls.down]) { this.guardPressTimer++; } 
+                else { this.guardPressTimer = 0; }
 
+                if (this.chickenTimer > 0) {
+                    this.chickenTimer--;
+                    if (this.chickenTimer <= 0) { this.isGoldenChicken = false; this.moveSpeed = this.baseSpeed; }
+                } 
+                if (this.emojiTimer > 0) { this.emojiTimer--; } else { this.emoji = ""; }
                 if (this.fireMultiBallTimer > 0) this.fireMultiBallTimer--;
 
                 if (this.frozenTimer > 0) {
-                    this.frozenTimer--;
-                    this.vx = 0; 
-                    this.vy += GRAVITY; 
-                    this.y += this.vy;
-                    if(this.y > GROUND_Y - DISPLAY_H) { this.y = GROUND_Y - DISPLAY_H; this.vy = 0; }
-                    return; 
+                    this.frozenTimer--; this.vx = 0; this.vy += GRAVITY; this.y += this.vy;
+                    if(this.y > GROUND_Y - DISPLAY_H) { this.y = GROUND_Y - DISPLAY_H; this.vy = 0; } return; 
                 }
 
                 if (this.stunTimer > 0) {
                     this.stunTimer--;
-                    
-                    if (this.isSmashHit) {
-                        this.angle += 0.5; 
-                    } else {
-                        this.angle += 0.3; 
-                    }
-
-                    this.vx *= 0.9; 
-                    this.vy += GRAVITY; 
-                    this.y += this.vy;
+                    if (this.isSmashHit) { this.angle += 0.5; } else { this.angle += 0.3; }
+                    this.vx *= 0.9; this.vy += GRAVITY; this.y += this.vy;
                     if(this.y > GROUND_Y - DISPLAY_H) { this.y = GROUND_Y - DISPLAY_H; this.vy = 0; }
                     this.x += this.vx; 
                     const wallOffset = 80;
                     if (this.side === 'left') this.x = Math.max(-wallOffset, Math.min(this.x, 700 - DISPLAY_W + 50));
                     else this.x = Math.max(700 - 50, Math.min(this.x, 1400 - DISPLAY_W + wallOffset));
-                    
-                    if (this.stunTimer <= 0) {
-                        this.angle = 0;
-                        this.isSmashHit = false; 
-                    }
-                    return; 
+                    if (this.stunTimer <= 0) { this.angle = 0; this.isSmashHit = false; } return; 
                 } else { this.angle = 0; }
 
                 let currentSpeed = this.moveSpeed;
-                
-                if (typhoonTimer > 0) {
-                    this.vx += windDirection * 0.8; 
-                }
-
-                if (this.poopTimer > 0) {
-                    this.poopTimer--;
-                    currentSpeed = this.baseSpeed * 0.3; 
-                }
+                if (typhoonTimer > 0) { this.vx += windDirection * 0.8; }
+                if (this.poopTimer > 0) { this.poopTimer--; currentSpeed = this.baseSpeed * 0.3; }
                 
                 let leftKey = keys[this.controls.left];
                 let rightKey = keys[this.controls.right];
-                
-                if (this.confusedTimer > 0) {
-                    this.confusedTimer--;
-                    let temp = leftKey; leftKey = rightKey; rightKey = temp;
-                }
+                if (this.confusedTimer > 0) { this.confusedTimer--; let temp = leftKey; leftKey = rightKey; rightKey = temp; }
 
                 if (leftKey) this.vx = -currentSpeed;
                 if (rightKey) this.vx = currentSpeed;
-                
-                if (Math.abs(this.vx) > 1.5 && this.y >= GROUND_Y - DISPLAY_H) {
-                    if (Math.random() < 0.3) {
-                        dusts.push(new Dust(this.x + DISPLAY_W/2, this.y + DISPLAY_H));
-                    }
-                }
+                if (Math.abs(this.vx) > 1.5 && this.y >= GROUND_Y - DISPLAY_H) { if (Math.random() < 0.3) { dusts.push(new Dust(this.x + DISPLAY_W/2, this.y + DISPLAY_H)); } }
 
                 if (keys[this.controls.up] && !this.isJumping) { 
-                    this.vy = this.jumpForce; 
-                    this.isJumping = true; 
-                    if (this.hasJumpBuff) {
-                        jumpSound.currentTime = 0;
-                        jumpSound.play().catch(()=>{});
-                    }
+                    this.vy = this.jumpForce; this.isJumping = true; 
+                    if (this.hasJumpBuff) { jumpSound.currentTime = 0; jumpSound.play().catch(()=>{}); }
                 }
                 this.vy += GRAVITY; this.vx *= FRICTION;
                 this.x += this.vx; this.y += this.vy;
                 if (this.y < 0) { this.y = 0; this.vy = 0; }
-                
                 if (this.y > GROUND_Y - DISPLAY_H) { 
-                    if (this.isJumping) { 
-                        for(let k=0; k<8; k++) {
-                            dusts.push(new Dust(this.x + DISPLAY_W/2, GROUND_Y));
-                        }
-                    }
+                    if (this.isJumping) { for(let k=0; k<8; k++) { dusts.push(new Dust(this.x + DISPLAY_W/2, GROUND_Y)); } }
                     this.y = GROUND_Y - DISPLAY_H; this.vy = 0; this.isJumping = false; 
                 }
-                
                 const wallOffset = 80;
                 if (this.side === 'left') this.x = Math.max(-wallOffset, Math.min(this.x, 700 - DISPLAY_W + 50));
                 else this.x = Math.max(700 - 50, Math.min(this.x, 1400 - DISPLAY_W + wallOffset));
             }
+
             draw() {
                 ctx.save();
                 const barW = 80; const barH = 10;
                 const barX = this.x + DISPLAY_W/2 - barW/2;
-                const barY = this.y - 65; 
+                const barY = this.y - 70; 
                 const isMax = this.gauge >= 100;
 
+                // 1. 게이지 그리기 (스매시 게이지)
                 ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(barX, barY, barW, barH);
                 const fillW = (this.gauge / this.maxGauge) * barW;
-                
                 if (isMax) {
                     const hue = (Date.now() / 2) % 360;
-                    ctx.fillStyle = `hsl(${hue}, 100%, 50%)`; 
-                    ctx.shadowBlur = 15; ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+                    ctx.fillStyle = `hsl(${hue}, 100%, 50%)`; ctx.shadowBlur = 15; ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
                     if (Math.floor(Date.now() / 100) % 2 === 0) {
-                        ctx.font = "bold 24px 'Black Han Sans', sans-serif";
-                        ctx.textAlign = "center"; ctx.fillStyle = "#FFD700"; 
-                        ctx.strokeStyle = "red"; ctx.lineWidth = 3;
-                        ctx.strokeText("MAX!", this.x + DISPLAY_W/2, barY - 8);
-                        ctx.fillText("MAX!", this.x + DISPLAY_W/2, barY - 8);
+                        ctx.font = "bold 24px 'Black Han Sans', sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#FFD700"; 
+                        ctx.strokeStyle = "red"; ctx.lineWidth = 3; ctx.strokeText("MAX!", this.x + DISPLAY_W/2, barY - 8); ctx.fillText("MAX!", this.x + DISPLAY_W/2, barY - 8);
                     }
-                } else {
-                    ctx.fillStyle = "yellow"; ctx.shadowBlur = 0;
-                }
+                } else { ctx.fillStyle = "yellow"; ctx.shadowBlur = 0; }
                 ctx.fillRect(barX, barY, fillW, barH);
                 ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.strokeRect(barX, barY, barW, barH);
+
+                // ▼ [수정] 2. 스킬 쿨타임 바 그리기 (잘 보이게 개선)
+                const skillBarY = barY + 18;
+                const skillBarH = 10; // 높이 증가
+                
+                // 배경
+                ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; 
+                ctx.fillRect(barX, skillBarY, barW, skillBarH);
+                
+                const skillRatio = (this.maxSkillCooldown - this.skillCooldown) / this.maxSkillCooldown;
+                
+                // 차오르는 바 색상 변경 (눈에 띄는 형광색)
+                if (skillRatio >= 1) {
+                    // 스킬 사용 가능 상태: 네온 효과
+                    const pulse = (Math.sin(Date.now() / 100) + 1) / 2; 
+                    ctx.fillStyle = `rgba(0, 255, 255, ${0.5 + 0.5 * pulse})`; 
+                    ctx.shadowBlur = 10; ctx.shadowColor = "#00FFFF";
+                } else {
+                    // 쿨타임 중: 진한 파란색 -> 밝은 하늘색
+                    ctx.fillStyle = "#00BFFF";
+                    ctx.shadowBlur = 0;
+                }
+                
+                ctx.fillRect(barX, skillBarY, barW * skillRatio, skillBarH);
+                
+                // 테두리 추가
+                ctx.strokeStyle = "white"; ctx.lineWidth = 1.5;
+                ctx.strokeRect(barX, skillBarY, barW, skillBarH);
+                
+                if (skillRatio >= 1) {
+                    if (frameCount % 30 < 20) {
+                        ctx.fillStyle = "#00FFFF"; ctx.font = "bold 13px 'Black Han Sans'"; ctx.textAlign = "center";
+                        ctx.shadowColor="black"; ctx.shadowBlur=4;
+                        const keyStr = this.side === 'left' ? "SHIFT" : "ENTER";
+                        ctx.fillText("SKILL READY!", this.x + DISPLAY_W/2, skillBarY + 25);
+                        ctx.font = "bold 11px Arial";
+                        ctx.fillText(`[${keyStr}]`, this.x + DISPLAY_W/2, skillBarY + 38);
+                    }
+                }
                 ctx.restore();
 
+                // 이모티콘 및 상태 아이콘
                 if (this.emojiTimer > 0 && this.emoji) {
-                    ctx.save();
-                    ctx.font = "bold 50px Arial";
-                    ctx.textAlign = "center";
-                    ctx.fillStyle = "white";
-                    ctx.shadowBlur = 10; ctx.shadowColor = "black";
-                    const floatY = Math.sin(Date.now() / 100) * 5;
-                    ctx.fillText(this.emoji, this.x + DISPLAY_W/2, this.y - 100 + floatY);
-                    ctx.restore();
+                    ctx.save(); ctx.font = "bold 50px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "white"; ctx.shadowBlur = 10; ctx.shadowColor = "black";
+                    const floatY = Math.sin(Date.now() / 100) * 5; ctx.fillText(this.emoji, this.x + DISPLAY_W/2, this.y - 100 + floatY); ctx.restore();
                 }
-
                 let statusIcon = "";
-                if (this.isSmashHit || this.stunTimer > 0) statusIcon = "💫";
-                else if (this.frozenTimer > 0) statusIcon = "❄️";
-                else if (this.poopTimer > 0) statusIcon = "🪰";
-                else if (this.confusedTimer > 0) statusIcon = "😵";
-                else if (this.fireMultiBallTimer > 0) statusIcon = "🔥";
-                else if (this.moveSpeed > this.baseSpeed) statusIcon = "⚡";
+                if (this.isSmashHit || this.stunTimer > 0) statusIcon = "💫"; else if (this.frozenTimer > 0) statusIcon = "❄️"; else if (this.poopTimer > 0) statusIcon = "🪰"; else if (this.confusedTimer > 0) statusIcon = "😵"; else if (this.fireMultiBallTimer > 0) statusIcon = "🔥"; else if (this.moveSpeed > this.baseSpeed) statusIcon = "⚡";
+                if (statusIcon) { ctx.save(); ctx.font = "bold 40px Arial"; ctx.textAlign = "center"; ctx.fillText(statusIcon, this.x + DISPLAY_W/2, this.y - 95 + Math.sin(frameCount/8)*5); ctx.restore(); }
 
-                if (statusIcon) {
-                    ctx.save();
-                    ctx.font = "bold 40px Arial"; ctx.textAlign = "center";
-                    ctx.fillText(statusIcon, this.x + DISPLAY_W/2, this.y - 85 + Math.sin(frameCount/8)*5);
-                    ctx.restore();
-                }
-
+                // 캐릭터 그리기
                 ctx.save();
                 ctx.translate(this.x + DISPLAY_W/2, this.y + DISPLAY_H/2);
                 ctx.rotate(this.angle);
                 ctx.scale(this.scale, this.scale);
-                
                 if (isMax) { ctx.shadowColor = "rgba(255, 255, 0, 0.8)"; ctx.shadowBlur = 20; }
                 if (this.poopTimer > 0) { ctx.filter = "sepia(1) hue-rotate(-50deg) saturate(3)"; ctx.font = "40px Arial"; ctx.fillText("💩", 0, -80); }
+                if (this.frozenTimer > 0) { ctx.filter = "hue-rotate(180deg) brightness(1.5)"; ctx.font = "40px Arial"; ctx.fillText("❄️", 0, -80); }
+                if (this.isSmashHit) { ctx.filter = "grayscale(100%)"; } else if (this.stunTimer > 0 && !this.isSmashHit) { ctx.filter = "grayscale(100%) blur(1px)"; }
+                if (this.confusedTimer > 0) { const wobble = Math.sin(Date.now() / 100) * 10; ctx.font = "40px Arial"; ctx.fillText("❓", wobble, -80); }
                 
-                if (this.frozenTimer > 0) {
-                    ctx.filter = "hue-rotate(180deg) brightness(1.5)"; 
-                    ctx.font = "40px Arial"; ctx.fillText("❄️", 0, -80);
-                }
-
-                if (this.isSmashHit) {
-                     ctx.filter = "grayscale(100%)";
-                } else if (this.stunTimer > 0 && !this.isSmashHit) {
-                     ctx.filter = "grayscale(100%) blur(1px)";
-                }
-
-                if (this.confusedTimer > 0) {
-                    const wobble = Math.sin(Date.now() / 100) * 10;
-                    ctx.font = "40px Arial"; ctx.fillText("❓", wobble, -80);
-                }
-
                 if (this.name === "근육할배") {
-                    ctx.save();
-                    const pulse = Math.sin(frameCount * 0.1) * 0.1 + 0.9; 
-                    const glowSize = 70 * pulse;
-                    ctx.shadowBlur = 40; ctx.shadowColor = "rgba(255, 215, 0, 0.9)"; 
-                    ctx.fillStyle = "rgba(255, 223, 0, 0.25)"; 
-                    ctx.beginPath(); ctx.arc(0, 0, glowSize, 0, Math.PI*2); ctx.fill();
-                    ctx.restore();
+                    ctx.save(); const pulse = Math.sin(frameCount * 0.1) * 0.1 + 0.9; const glowSize = 70 * pulse;
+                    ctx.shadowBlur = 40; ctx.shadowColor = "rgba(255, 215, 0, 0.9)"; ctx.fillStyle = "rgba(255, 223, 0, 0.25)"; 
+                    ctx.beginPath(); ctx.arc(0, 0, glowSize, 0, Math.PI*2); ctx.fill(); ctx.restore();
                 }
                 if (this.name === "돈까스할매" && keys[this.controls.down] && this.y < GROUND_Y - DISPLAY_H) {
-                    ctx.save(); ctx.translate(this.x + DISPLAY_W/2, this.y + DISPLAY_H/2);
-                    ctx.shadowBlur = 20; ctx.shadowColor = "red";
+                    ctx.save(); ctx.translate(this.x + DISPLAY_W/2, this.y + DISPLAY_H/2); ctx.shadowBlur = 20; ctx.shadowColor = "red";
                     ctx.strokeStyle = `rgba(255, 69, 0, ${Math.random() * 0.5 + 0.5})`; ctx.lineWidth = 8;
-                    ctx.beginPath(); ctx.arc(0, 0, 80, 0, Math.PI * 2); ctx.stroke();
-                    ctx.fillStyle = "orange";
-                    for(let k=0; k<3; k++) { let lx = (Math.random()-0.5) * 100; let ly = (Math.random()-0.5) * 100; ctx.fillRect(lx, ly, 40, 4); }
-                    ctx.restore();
+                    ctx.beginPath(); ctx.arc(0, 0, 80, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "orange";
+                    for(let k=0; k<3; k++) { let lx = (Math.random()-0.5) * 100; let ly = (Math.random()-0.5) * 100; ctx.fillRect(lx, ly, 40, 4); } ctx.restore();
+                }
+                if (this.isGoldenChicken) {
+                    ctx.save(); const pulse = Math.sin(frameCount * 0.2) * 0.2 + 0.8; const glowSize = 60 * pulse;
+                    ctx.shadowBlur = 50; ctx.shadowColor = "rgba(255, 215, 0, 1.0)"; ctx.fillStyle = "rgba(255, 223, 0, 0.4)"; 
+                    ctx.beginPath(); ctx.arc(0, 0, glowSize, 0, Math.PI*2); ctx.fill(); ctx.restore();
                 }
 
-                ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; ctx.beginPath();
-                ctx.ellipse(0, DISPLAY_H/2 - 10, 60, 15, 0, 0, Math.PI*2); ctx.fill();
-                
+                ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; ctx.beginPath(); ctx.ellipse(0, DISPLAY_H/2 - 10, 60, 15, 0, 0, Math.PI*2); ctx.fill();
                 const isAction = this.isJumping || keys[this.controls.down];
                 const frameIdx = isAction ? this.frames[1] : this.frames[0];
                 
                 if (gameState === 'gameover' && this.side !== winnerSide) {
-                    if (this.img && this.img.complete) { 
-                        ctx.drawImage(this.img, frameIdx * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2, -DISPLAY_H/2 + 100, DISPLAY_W, DISPLAY_H * 0.5); 
-                    }
+                    if (this.img && this.img.complete) { ctx.drawImage(this.img, frameIdx * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2, -DISPLAY_H/2 + 100, DISPLAY_W, DISPLAY_H * 0.5); }
                 } else {
-                    if (this.chickenTimer > 0) {
-                        if (images.three && images.three.complete) {
-                            ctx.drawImage(images.three, 4 * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2 - 70, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H);
-                            ctx.drawImage(images.three, 4 * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H);
-                            ctx.drawImage(images.three, 4 * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2 + 70, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H);
-                        }
-                    } else {
-                        if (this.img && this.img.complete) { 
-                            ctx.drawImage(this.img, frameIdx * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H); 
-                        }
-                    }
+                    if (this.isGoldenChicken) { if (images.two && images.two.complete) { ctx.drawImage(images.two, 4 * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H); } } 
+                    else if (this.chickenTimer > 0) { if (images.three && images.three.complete) { ctx.drawImage(images.three, 4 * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2 - 70, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H); ctx.drawImage(images.three, 4 * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H); ctx.drawImage(images.three, 4 * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2 + 70, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H); } } 
+                    else { if (this.img && this.img.complete) { ctx.drawImage(this.img, frameIdx * FRAME_W, 0, FRAME_W, FRAME_H, -DISPLAY_W/2, -DISPLAY_H/2, DISPLAY_W, DISPLAY_H); } }
                 }
                 ctx.restore(); 
 
@@ -815,107 +591,46 @@
 
         class Ball {
             constructor() { 
-                this.defaultColor = '#ffeb3b';
-                this.smashStart = { x: 0, y: 0 };
-                this.smashControl = { x: 0, y: 0 };
-                this.smashEnd = { x: 0, y: 0 };
-                this.smashTimer = 0;
-                this.smashDuration = 0;
-                this.trail = []; 
-                
-                this.isRising = false;  
-                this.isHolding = false; 
-                this.holdingTimer = 0; 
-                this.fireShooter = null; 
-
+                this.defaultColor = '#ffeb3b'; this.smashStart = { x: 0, y: 0 }; this.smashControl = { x: 0, y: 0 }; this.smashEnd = { x: 0, y: 0 }; this.smashTimer = 0; this.smashDuration = 0; this.trail = []; 
+                this.isRising = false; this.isHolding = false; this.holdingTimer = 0; this.fireShooter = null; 
                 this.reset('left'); 
             }
-            
             reset(side) {
                 this.x = side === 'left' ? 350 : 1050; this.y = 200; this.vx = 0; this.vy = 0;
                 this.radius = BALL_R; this.color = this.defaultColor; 
-                this.mass = 1; this.mushroomCount = 0; this.isFireShot = false; 
-                this.isSuperSmash = false; 
-                
-                this.isRising = false;
-                this.isHolding = false;
-                this.fireShooter = null;
-
-                this.trail = [];
-                rallyCount = 0; 
+                this.mass = 1; this.mushroomCount = 0; this.isFireShot = false; this.isSuperSmash = false; 
+                this.isRising = false; this.isHolding = false; this.fireShooter = null;
+                this.trail = []; rallyCount = 0; 
             }
-
             update() {
                 if (gameState !== 'playing') return;
                 if (cinematicTimer > 0) return; 
 
                 if (this.isRising) {
-                    const targetY = 50; 
-                    const speed = 25 * GAME_SPEED_RATIO;
+                    const targetY = 50; const speed = 25 * GAME_SPEED_RATIO;
                     this.y = Math.max(targetY, this.y - speed);
-                    
-                    this.trail.push({x: this.x, y: this.y, r: Math.random() * 10 + 20}); 
-                    if (this.trail.length > 25) this.trail.shift(); 
-                    
+                    this.trail.push({x: this.x, y: this.y, r: Math.random() * 10 + 20}); if (this.trail.length > 25) this.trail.shift(); 
                     if (Math.random() < 0.5) particles.push(new Particle(this.x, this.y, "rgba(255,100,0,0.5)"));
-
-                    if (this.y <= targetY) {
-                        this.isRising = false;
-                        this.isHolding = true;
-                        this.holdingTimer = 40; 
-                        showItemNotice("🔥 차지 중...! 🔥");
-                    }
-                    return; 
+                    if (this.y <= targetY) { this.isRising = false; this.isHolding = true; this.holdingTimer = 40; showItemNotice("🔥 차지 중...! 🔥"); } return; 
                 }
 
                 if (this.isHolding) {
-                    this.holdingTimer--;
-                    this.x += (Math.random() - 0.5) * 5;
-                    this.y += (Math.random() - 0.5) * 5;
-                    
-                    for(let i=0; i<3; i++) {
-                        let angle = Math.random() * Math.PI * 2;
-                        let dist = 50 + Math.random() * 20;
-                        let px = this.x + Math.cos(angle) * dist;
-                        let py = this.y + Math.sin(angle) * dist;
-                        let p = new Particle(px, py, "#FFD700");
-                        p.vx = (this.x - px) * 0.1;
-                        p.vy = (this.y - py) * 0.1;
-                        particles.push(p);
-                    }
-
-                    if (this.holdingTimer <= 0) {
-                        this.isHolding = false;
-                        fireScatterShot(this); 
-                    }
-                    return; 
+                    this.holdingTimer--; this.x += (Math.random() - 0.5) * 5; this.y += (Math.random() - 0.5) * 5;
+                    for(let i=0; i<3; i++) { let angle = Math.random() * Math.PI * 2; let dist = 50 + Math.random() * 20; let px = this.x + Math.cos(angle) * dist; let py = this.y + Math.sin(angle) * dist; let p = new Particle(px, py, "#FFD700"); p.vx = (this.x - px) * 0.1; p.vy = (this.y - py) * 0.1; particles.push(p); }
+                    if (this.holdingTimer <= 0) { this.isHolding = false; fireScatterShot(this); } return; 
                 }
 
-                if (this.isFireShot) {
-                    this.trail.push({x: this.x, y: this.y, r: this.radius * 1.2}); 
-                    if (this.trail.length > 30) this.trail.shift(); 
-                    particles.push(new Particle(this.x, this.y, Math.random() < 0.5 ? "#FF4500" : "#FFFF00"));
-                    if(Math.random() < 0.3) particles.push(new Particle(this.x, this.y, "#333333", true)); 
-                } 
-                else if (this.isSuperSmash || Math.abs(this.vx) > 12 || Math.abs(this.vy) > 12) {
-                    this.trail.push({x: this.x, y: this.y, r: Math.random() * 10 + 20}); 
-                    if (this.trail.length > 25) this.trail.shift(); 
-                } else {
-                    if(this.trail.length > 0) this.trail.shift();
-                }
+                if (this.isFireShot) { this.trail.push({x: this.x, y: this.y, r: this.radius * 1.2}); if (this.trail.length > 30) this.trail.shift(); particles.push(new Particle(this.x, this.y, Math.random() < 0.5 ? "#FF4500" : "#FFFF00")); if(Math.random() < 0.3) particles.push(new Particle(this.x, this.y, "#333333", true)); } 
+                else if (this.isSuperSmash || Math.abs(this.vx) > 12 || Math.abs(this.vy) > 12) { this.trail.push({x: this.x, y: this.y, r: Math.random() * 10 + 20}); if (this.trail.length > 25) this.trail.shift(); } 
+                else { if(this.trail.length > 0) this.trail.shift(); }
 
                 if (this.isSuperSmash) {
-                    this.smashTimer++;
-                    let t = this.smashTimer / this.smashDuration; 
-                    if (t >= 1) { t = 1; this.isSuperSmash = false; }
-                    let u = 1 - t;
-                    this.x = (u * u * this.smashStart.x) + (2 * u * t * this.smashControl.x) + (t * t * this.smashEnd.x);
-                    this.y = (u * u * this.smashStart.y) + (2 * u * t * this.smashControl.y) + (t * t * this.smashEnd.y);
+                    this.smashTimer++; let t = this.smashTimer / this.smashDuration; if (t >= 1) { t = 1; this.isSuperSmash = false; }
+                    let u = 1 - t; this.x = (u * u * this.smashStart.x) + (2 * u * t * this.smashControl.x) + (t * t * this.smashEnd.x); this.y = (u * u * this.smashStart.y) + (2 * u * t * this.smashControl.y) + (t * t * this.smashEnd.y);
                     for(let i=0; i<3; i++) particles.push(new Particle(this.x + (Math.random()-0.5)*40, this.y + (Math.random()-0.5)*40, "#FFFF00"));
                 } else {
                     const currentGravity = GRAVITY * this.mass; 
-                    this.vy += currentGravity; this.vx *= 0.99; 
-                    if (typhoonTimer > 0) this.vx += windDirection * 0.15; 
+                    this.vy += currentGravity; this.vx *= 0.99; if (typhoonTimer > 0) this.vx += windDirection * 0.15; 
                     this.x += this.vx; this.y += this.vy;
                 }
 
@@ -923,142 +638,55 @@
                     if (this.x < this.radius) { this.x = this.radius; this.vx *= -0.9; createExplosion(this.x, this.y, "white"); }
                     else if (this.x > 1400 - this.radius) { this.x = 1400 - this.radius; this.vx *= -0.9; createExplosion(this.x, this.y, "white"); }
                     const currentNetHeight = (wallTimer > 0) ? 400 : 200; 
-                    if (Math.abs(this.x - 700) < this.radius + 10 && this.y > (GROUND_Y - currentNetHeight)) {
-                         this.vx *= -1; netBendVel = this.vx * 1.5; 
-                    }
+                    if (Math.abs(this.x - 700) < this.radius + 10 && this.y > (GROUND_Y - currentNetHeight)) { this.vx *= -1; netBendVel = this.vx * 1.5; }
                 }
 
                 if (this.y < this.radius) { this.y = this.radius; this.vy *= -0.8; }
                 
                 if (this.y > 800 - this.radius - 50) {
-                    if (this.x < 700) {
-                        let points = 1; if (p2.chickenTimer > 0) points = 2; 
-                        score.p2 += points;
-                        reactions.push(new Reaction(p2.x + DISPLAY_W/2, p2.y, "🤣")); 
-                        reactions.push(new Reaction(p1.x + DISPLAY_W/2, p1.y, "😭")); 
-                    } else { 
-                        let points = 1; if (p1.chickenTimer > 0) points = 2; 
-                        score.p1 += points;
-                        reactions.push(new Reaction(p1.x + DISPLAY_W/2, p1.y, "🤣"));
-                        reactions.push(new Reaction(p2.x + DISPLAY_W/2, p2.y, "😭"));
-                    }
+                    if (this.x < 700) { let points = 1; if (p2.chickenTimer > 0) points = 2; score.p2 += points; reactions.push(new Reaction(p2.x + DISPLAY_W/2, p2.y, "🤣")); reactions.push(new Reaction(p1.x + DISPLAY_W/2, p1.y, "😭")); } 
+                    else { let points = 1; if (p1.chickenTimer > 0) points = 2; score.p1 += points; reactions.push(new Reaction(p1.x + DISPLAY_W/2, p1.y, "🤣")); reactions.push(new Reaction(p2.x + DISPLAY_W/2, p2.y, "😭")); }
                     scoreP1.innerText = score.p1; scoreP2.innerText = score.p2;
                     
                     const maxScore = Math.max(score.p1, score.p2);
-                    if ((maxScore === 5 && lastMaxScore < 5) || (maxScore === 10 && lastMaxScore < 10)) {
-                        showItemNotice(`🌟 ${maxScore}점 돌파! 배경 변경! 🌟`);
-                        let newBgIndex; do { newBgIndex = Math.floor(Math.random() * BG_CONFIG.length); } while (newBgIndex === currentBgIndex);
-                        updateBackground(newBgIndex);
-                    }
+                    if ((maxScore === 5 && lastMaxScore < 5) || (maxScore === 10 && lastMaxScore < 10)) { showItemNotice(`🌟 ${maxScore}점 돌파! 배경 변경! 🌟`); let newBgIndex; do { newBgIndex = Math.floor(Math.random() * BG_CONFIG.length); } while (newBgIndex === currentBgIndex); updateBackground(newBgIndex); }
                     lastMaxScore = maxScore;
 
-                    if (this.isSuperSmash || this.isFireShot) {
-                        shakeDuration = 30; 
-                        for(let i=0; i<40; i++) particles.push(new Particle(this.x, this.y, "#FF0000"));
-                        charEffects.push(new Shockwave(this.x, this.y, "#FFD700")); 
-                    }
+                    if (this.isSuperSmash || this.isFireShot) { shakeDuration = 30; for(let i=0; i<40; i++) particles.push(new Particle(this.x, this.y, "#FF0000")); charEffects.push(new Shockwave(this.x, this.y, "#FFD700")); }
 
-                    if (score.p1 >= WIN_SCORE || score.p2 >= WIN_SCORE) {
-                        isGameOver = true; gameState = 'gameover';
-                        winnerSide = score.p1 >= WIN_SCORE ? 'left' : 'right';
-                        winnerName = score.p1 >= WIN_SCORE ? p1.name : p2.name; bgMusic.pause();
-                        for(let k=0; k<100; k++) confettis.push(new Confetti());
-                    } else {
-                        p1.x = 200; p1.y = GROUND_Y - DISPLAY_H; p1.vx=0; p1.vy=0;
-                        p2.x = 900; p2.y = GROUND_Y - DISPLAY_H; p2.vx=0; p2.vy=0;
-                        this.reset(this.x < 700 ? 'left' : 'right');
-                        fakeBalls = [];
-                    }
+                    if (score.p1 >= WIN_SCORE || score.p2 >= WIN_SCORE) { isGameOver = true; gameState = 'gameover'; winnerSide = score.p1 >= WIN_SCORE ? 'left' : 'right'; winnerName = score.p1 >= WIN_SCORE ? p1.name : p2.name; bgMusic.pause(); for(let k=0; k<100; k++) confettis.push(new Confetti()); } 
+                    else { p1.x = 200; p1.y = GROUND_Y - DISPLAY_H; p1.vx=0; p1.vy=0; p2.x = 900; p2.y = GROUND_Y - DISPLAY_H; p2.vx=0; p2.vy=0; this.reset(this.x < 700 ? 'left' : 'right'); fakeBalls = []; }
                 }
-                
                 if(this.isFireShot && frameCount % 3 === 0) particles.push(new Particle(this.x, this.y, "#FF4500"));
             }
 
             draw() {
                 if (this.trail.length > 1) {
                     ctx.save();
-                    
                     if (this.isFireShot) {
-                        ctx.globalCompositeOperation = 'lighter';
-                        ctx.lineCap = 'round';
-                        for (let i = 0; i < this.trail.length - 1; i++) {
-                            const point = this.trail[i];
-                            const nextPoint = this.trail[i+1];
-                            const ratio = i / this.trail.length;
-                            ctx.beginPath();
-                            ctx.moveTo(point.x, point.y);
-                            ctx.lineTo(nextPoint.x, nextPoint.y);
-                            ctx.lineWidth = this.radius * 2 * (ratio + 0.2);
-                            if (ratio > 0.8) ctx.strokeStyle = "#FFFFFF"; 
-                            else if (ratio > 0.6) ctx.strokeStyle = "#FFFF00";
-                            else if (ratio > 0.3) ctx.strokeStyle = "#FF4500";
-                            else ctx.strokeStyle = "rgba(255, 0, 0, 0.5)"; 
-                            ctx.shadowBlur = 20 * ratio;
-                            ctx.shadowColor = "orange";
-                            ctx.stroke();
-                        }
+                        ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+                        for (let i = 0; i < this.trail.length - 1; i++) { const point = this.trail[i]; const nextPoint = this.trail[i+1]; const ratio = i / this.trail.length; ctx.beginPath(); ctx.moveTo(point.x, point.y); ctx.lineTo(nextPoint.x, nextPoint.y); ctx.lineWidth = this.radius * 2 * (ratio + 0.2); if (ratio > 0.8) ctx.strokeStyle = "#FFFFFF"; else if (ratio > 0.6) ctx.strokeStyle = "#FFFF00"; else if (ratio > 0.3) ctx.strokeStyle = "#FF4500"; else ctx.strokeStyle = "rgba(255, 0, 0, 0.5)"; ctx.shadowBlur = 20 * ratio; ctx.shadowColor = "orange"; ctx.stroke(); }
                     } else if (this.isSuperSmash || this.isRising) {
-                        ctx.globalCompositeOperation = 'lighter';
-                        ctx.beginPath();
-                        ctx.moveTo(this.trail[0].x, this.trail[0].y);
-                        for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
-                        
-                        ctx.strokeStyle = "rgba(255, 0, 0, 0.4)";
-                        ctx.lineWidth = this.radius * 2.5; 
-                        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-                        ctx.shadowBlur = 30; ctx.shadowColor = "red";
-                        ctx.stroke();
-
-                        ctx.beginPath();
-                        ctx.moveTo(this.trail[0].x, this.trail[0].y);
-                        for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
-                        ctx.strokeStyle = "rgba(255, 165, 0, 0.7)";
-                        ctx.lineWidth = this.radius * 1.5;
-                        ctx.stroke();
-
+                        ctx.globalCompositeOperation = 'lighter'; ctx.beginPath(); ctx.moveTo(this.trail[0].x, this.trail[0].y); for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                        ctx.strokeStyle = "rgba(255, 0, 0, 0.4)"; ctx.lineWidth = this.radius * 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.shadowBlur = 30; ctx.shadowColor = "red"; ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(this.trail[0].x, this.trail[0].y); for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y); ctx.strokeStyle = "rgba(255, 165, 0, 0.7)"; ctx.lineWidth = this.radius * 1.5; ctx.stroke();
                     } else {
-                        ctx.beginPath();
-                        ctx.moveTo(this.trail[0].x, this.trail[0].y);
-                        for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
-                        ctx.strokeStyle = "rgba(255, 255, 0, 0.3)";
-                        ctx.lineWidth = this.radius;
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(this.trail[0].x, this.trail[0].y); for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y); ctx.strokeStyle = "rgba(255, 255, 0, 0.3)"; ctx.lineWidth = this.radius; ctx.stroke();
                     }
                     ctx.restore();
                 }
 
-                if (this.y < GROUND_Y - 20) {
-                    ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; ctx.beginPath();
-                    let shadowSize = Math.max(10, this.radius - (GROUND_Y - this.y) * 0.05);
-                    ctx.ellipse(this.x, GROUND_Y - 10, shadowSize, shadowSize * 0.3, 0, 0, Math.PI*2); ctx.fill();
-                }
+                if (this.y < GROUND_Y - 20) { ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; ctx.beginPath(); let shadowSize = Math.max(10, this.radius - (GROUND_Y - this.y) * 0.05); ctx.ellipse(this.x, GROUND_Y - 10, shadowSize, shadowSize * 0.3, 0, 0, Math.PI*2); ctx.fill(); }
                 
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
-                
-                if (ghostBallTimer > 0) {
-                    ctx.globalAlpha = 0.15; 
-                } else {
-                    ctx.globalAlpha = 1.0;
-                }
+                if (ghostBallTimer > 0) ctx.globalAlpha = 0.15; else ctx.globalAlpha = 1.0;
 
-                if (this.isFireShot) {
-                    const pulse = Math.sin(Date.now() / 50) * 5; 
-                    ctx.fillStyle = "#FFDD00"; 
-                    ctx.shadowBlur = 40 + pulse; 
-                    ctx.shadowColor = "#FF0000"; 
-                }
-                else if (this.isSuperSmash || this.isRising || this.isHolding) { 
-                    ctx.fillStyle = "#FFFFFF"; 
-                    ctx.shadowBlur = 50; ctx.shadowColor = "#FF4500"; 
-                }
-                else if (this.mushroomCount > 0) { ctx.fillStyle = this.color; ctx.shadowBlur = 0; } 
-                else { ctx.fillStyle = this.defaultColor; ctx.shadowBlur = 0; }
+                if (this.isFireShot) { const pulse = Math.sin(Date.now() / 50) * 5; ctx.fillStyle = "#FFDD00"; ctx.shadowBlur = 40 + pulse; ctx.shadowColor = "#FF0000"; }
+                else if (this.isSuperSmash || this.isRising || this.isHolding) { ctx.fillStyle = "#FFFFFF"; ctx.shadowBlur = 50; ctx.shadowColor = "#FF4500"; }
+                else if (this.mushroomCount > 0) { ctx.fillStyle = this.color; ctx.shadowBlur = 0; } else { ctx.fillStyle = this.defaultColor; ctx.shadowBlur = 0; }
 
                 ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = "#333"; ctx.stroke(); 
-                
-                ctx.beginPath(); ctx.arc(this.x - 10, this.y - 10, 8, 0, Math.PI*2);
-                ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.fill(); ctx.shadowBlur = 0; 
-                
+                ctx.beginPath(); ctx.arc(this.x - 10, this.y - 10, 8, 0, Math.PI*2); ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.fill(); ctx.shadowBlur = 0; 
                 ctx.globalAlpha = 1.0;
             }
         }
@@ -1078,50 +706,20 @@
         ];
 
         let currentBgIndex = Math.floor(Math.random() * BG_CONFIG.length);
-        
         const images = {};
-        const imageSources = {
-            two: 'image/TWO.png', one: 'image/ONE.png', three: 'image/Three.png',
-            bg: `image/${BG_CONFIG[currentBgIndex].src}`
-        };
+        const imageSources = { two: 'image/TWO.png', one: 'image/ONE.png', three: 'image/Three.png', bg: `image/${BG_CONFIG[currentBgIndex].src}` };
+        let loadedCount = 0; const totalImages = Object.keys(imageSources).length; let gameStarted = false;
 
-        let loadedCount = 0;
-        const totalImages = Object.keys(imageSources).length;
-        let gameStarted = false;
-
-        function checkAllLoaded() {
-            loadedCount++;
-            if (loadedCount >= totalImages && !gameStarted) {
-                gameStarted = true; initGame(); loop();
-            }
-        }
-
-        for (const key in imageSources) {
-            images[key] = new Image();
-            images[key].onload = checkAllLoaded;
-            images[key].onerror = () => { console.error(`이미지 로드 실패: ${imageSources[key]}`); checkAllLoaded(); };
-            images[key].src = imageSources[key];
-        }
+        function checkAllLoaded() { loadedCount++; if (loadedCount >= totalImages && !gameStarted) { gameStarted = true; initGame(); loop(); } }
+        for (const key in imageSources) { images[key] = new Image(); images[key].onload = checkAllLoaded; images[key].onerror = () => { console.error(`이미지 로드 실패: ${imageSources[key]}`); checkAllLoaded(); }; images[key].src = imageSources[key]; }
         
-        function updateBackground(index) {
-            currentBgIndex = index;
-            const newSrc = `image/${BG_CONFIG[currentBgIndex].src}`;
-            const tempImg = new Image();
-            tempImg.onload = () => { images.bg = tempImg; };
-            tempImg.src = newSrc;
-            if(ball) ball.defaultColor = BG_CONFIG[currentBgIndex].ballColor;
-        }
+        function updateBackground(index) { currentBgIndex = index; const newSrc = `image/${BG_CONFIG[currentBgIndex].src}`; const tempImg = new Image(); tempImg.onload = () => { images.bg = tempImg; }; tempImg.src = newSrc; if(ball) ball.defaultColor = BG_CONFIG[currentBgIndex].ballColor; }
 
         const songList = ['song/song.mp3', 'song/song1.mp3', 'song/song2.mp3'];
         const randomSongIndex = Math.floor(Math.random() * songList.length);
-        const bgMusic = new Audio(songList[randomSongIndex]); 
-        bgMusic.loop = true; bgMusic.volume = 0.4;
-        const hitSound = new Audio('song/heavy_punch1.mp3'); 
-        hitSound.volume = 0.8;
-        // ★ [저스트 가드 사운드 추가]
-        const strikingSound = new Audio('song/striking.mp3');
-        strikingSound.volume = 0.9;
-
+        const bgMusic = new Audio(songList[randomSongIndex]); bgMusic.loop = true; bgMusic.volume = 0.4;
+        const hitSound = new Audio('song/heavy_punch1.mp3'); hitSound.volume = 0.8;
+        const strikingSound = new Audio('song/striking.mp3'); strikingSound.volume = 0.9;
         const jumpSound = new Audio('song/jump.mp3');
         const giantSound = new Audio('song/power.mp3');   
         const dwarfSound = new Audio('song/power1.mp3'); 
@@ -1136,26 +734,15 @@
         const windSound = new Audio('song/speed.mp3');        
         const ghostSound = new Audio('song/cold.mp3');        
         const cinematicSound = new Audio('song/power2.mp3'); 
+        const powerBestSound = new Audio('song/power_best.mp3');
 
-        let blackoutTimer = 0;   
-        let typhoonTimer = 0;    
-        let windDirection = 0;   
-        let ghostBallTimer = 0;
-        let wallTimer = 0; 
-        let slowMotionTimer = 0; 
-        let hitStopTimer = 0;
+        let blackoutTimer = 0; let typhoonTimer = 0; let windDirection = 0; let ghostBallTimer = 0;
+        let wallTimer = 0; let slowMotionTimer = 0; let hitStopTimer = 0;
 
-        let dusts = [];
-        let netBend = 0;
-        let netBendVel = 0;
+        let dusts = []; let netBend = 0; let netBendVel = 0;
+        let cinematicTimer = 0; let cinematicPlayer = null;
 
-        let cinematicTimer = 0;
-        let cinematicPlayer = null;
-
-        let CHAR_DB = {}; 
-        let GAME_SPEED_RATIO = 1.0; 
-        let isVsAI = false; 
-        let aiBrain = null;
+        let CHAR_DB = {}; let GAME_SPEED_RATIO = 1.0; let isVsAI = false; let aiBrain = null;
 
         function initGame() {
             CHAR_DB = {
@@ -1172,157 +759,59 @@
             const p2Val = params.get('p2') ? parseInt(params.get('p2')) : 1;
             
             GAME_SPEED_RATIO = params.get('speed') ? parseFloat(params.get('speed')) : 1.0;
-            
             isVsAI = params.get('mode') === 'ai';
-            if (isVsAI) {
-                aiBrain = new AIController();
-                modeDisplay.innerText = "MODE: 1 PLAYER (vs CPU)";
-                const p2Text = document.getElementById('p2-control-text');
-                if(p2Text) {
-                    p2Text.innerText = "🤖 AI CPU (자동) 🤖";
-                    p2Text.style.color = "#00FF00";
-                }
-            } else {
-                modeDisplay.innerText = "MODE: 2 PLAYERS";
-                const p2Text = document.getElementById('p2-control-text');
-                if(p2Text) {
-                    p2Text.innerHTML = '<span class="key-btn">↑</span><span class="key-btn">←</span><span class="key-btn">→</span> 이동 + <span class="key-btn" style="border-color:#ff5e62; color:#ff5e62">↓</span> 스매시';
-                }
-            }
+            
+            if (isVsAI) { aiBrain = new AIController(); modeDisplay.innerText = "MODE: 1 PLAYER (vs CPU)"; } 
+            else { modeDisplay.innerText = "MODE: 2 PLAYERS"; }
 
             p1 = new Player(200, CHAR_DB[p1Val], {up:'KeyW', left:'KeyA', right:'KeyD', down:'KeyS'}, 'left');
             p2 = new Player(900, CHAR_DB[p2Val], {up:'ArrowUp', left:'ArrowLeft', right:'ArrowRight', down:'ArrowDown'}, 'right');
             ball = new Ball();
-            ball.defaultColor = BG_CONFIG[currentBgIndex].ballColor;
-            ball.color = ball.defaultColor;
-            
+            ball.defaultColor = BG_CONFIG[currentBgIndex].ballColor; ball.color = ball.defaultColor;
             startCountdown();
         }
 
-        const GRAVITY = 0.15;       
-        const FRICTION = 0.92;
-        const DEFAULT_MOVE_SPEED = 5;
-        const DEFAULT_JUMP_FORCE = -9;
-        const FRAME_W = 960 / 5; const FRAME_H = 192; 
-        const DISPLAY_W = 320; const DISPLAY_H = 320;
-        const BALL_R = 35;
-        const GROUND_Y = 750;
-        const WIN_SCORE = 20; 
+        const GRAVITY = 0.15; const FRICTION = 0.92;
+        const FRAME_W = 960 / 5; const FRAME_H = 192; const DISPLAY_W = 320; const DISPLAY_H = 320;
+        const BALL_R = 35; const GROUND_Y = 750; const WIN_SCORE = 20; 
         
-        let score = { p1: 0, p2: 0 };
-        let isGameOver = false;
-        let winnerName = "";
-        let winnerSide = ""; 
-        let lastMaxScore = 0; 
-        let gameState = 'countdown'; 
-        let countdownText = "";
-        let rallyCount = 0; 
+        let score = { p1: 0, p2: 0 }; let isGameOver = false; let winnerName = ""; let winnerSide = ""; 
+        let lastMaxScore = 0; let gameState = 'countdown'; let countdownText = ""; let rallyCount = 0; 
         
-        const keys = {};
-        let shakeDuration = 0;
-        let particles = [];    
-        let charEffects = [];
-        let items = [];
-        let confettis = []; 
-        let reactions = []; 
-        let hitTexts = []; 
-        let fakeBalls = []; 
-        let inkSplotches = []; 
-        
-        let bigBallTimer = null;
-        let frameCount = 0; 
-        let p1, p2, ball;
+        const keys = {}; let shakeDuration = 0; let particles = []; let charEffects = []; let items = []; let confettis = []; let reactions = []; let hitTexts = []; let fakeBalls = []; let inkSplotches = []; 
+        let bigBallTimer = null; let frameCount = 0; let p1, p2, ball;
 
         function startCountdown() {
-            gameState = 'countdown';
-            countdownText = "3";
+            gameState = 'countdown'; countdownText = "3";
             p1.x = 200; p1.y = GROUND_Y - DISPLAY_H; p1.vx=0; p1.vy=0;
             p2.x = 900; p2.y = GROUND_Y - DISPLAY_H; p2.vx=0; p2.vy=0;
             ball.reset('left');
-
             let count = 3;
-            let timer = setInterval(() => {
-                count--;
-                if (count > 0) { countdownText = count.toString(); } 
-                else if (count === 0) { countdownText = "GAME START!"; } 
-                else {
-                    clearInterval(timer);
-                    gameState = 'playing';
-                    countdownText = "";
-                    bgMusic.play().catch(()=>{});
-                }
-            }, 1000);
+            let timer = setInterval(() => { count--; if (count > 0) { countdownText = count.toString(); } else if (count === 0) { countdownText = "GAME START!"; } else { clearInterval(timer); gameState = 'playing'; countdownText = ""; bgMusic.play().catch(()=>{}); } }, 1000);
         }
 
         window.onkeydown = (e) => {
             keys[e.code] = true;
-            
-            // ▼▼▼ 경로 수정 (game_select.html -> index.html) ▼▼▼
             if (isGameOver && e.code === 'Enter') window.location.href = 'index.html';
 
             if (!isGameOver && gameState === 'playing') {
-                if (e.code === 'Digit1') p1.setEmoji("😜");
-                if (e.code === 'Digit2') p1.setEmoji("😡");
-                if (e.code === 'Digit3') p1.setEmoji("😱");
-                if (e.code === 'Digit4') p1.setEmoji("💩");
+                if (e.code === 'Digit1') p1.setEmoji("😜"); if (e.code === 'Digit2') p1.setEmoji("😡"); if (e.code === 'Digit3') p1.setEmoji("😱"); if (e.code === 'Digit4') p1.setEmoji("💩");
+                if (!isVsAI) { if (e.code === 'KeyM') p2.setEmoji("😜"); if (e.code === 'Comma') p2.setEmoji("😡"); if (e.code === 'Period') p2.setEmoji("😱"); if (e.code === 'Slash') p2.setEmoji("💩"); }
 
-                if (!isVsAI) {
-                    if (e.code === 'KeyM') p2.setEmoji("😜");
-                    if (e.code === 'Comma') p2.setEmoji("😡");
-                    if (e.code === 'Period') p2.setEmoji("😱");
-                    if (e.code === 'Slash') p2.setEmoji("💩");
-                }
+                // ▼ [추가] 스킬 키 입력
+                if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { p1.useSkill(); }
+                if (e.code === 'Enter') { if (!isVsAI) p2.useSkill(); }
             }
         };
         window.onkeyup = (e) => keys[e.code] = false;
 
         function drawNet() {
-            const x = 695; const w = 10; 
-            const h = (wallTimer > 0) ? 400 : 200;
-            const y = GROUND_Y - h; 
-
-            netBendVel += -0.1 * netBend; 
-            netBendVel *= 0.9; 
-            netBend += netBendVel;
-
-            ctx.save();
-            ctx.fillStyle = "rgba(50, 50, 50, 0.4)";
-            
-            ctx.beginPath();
-            ctx.moveTo(x + netBend, y); 
-            ctx.lineTo(x + w + netBend, y);
-            ctx.lineTo(x + w, GROUND_Y); 
-            ctx.lineTo(x, GROUND_Y);
-            ctx.fill();
-
-            ctx.strokeStyle = "rgba(220, 220, 220, 0.8)"; ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (let i = y; i <= GROUND_Y; i += 8) { 
-                let progress = 1 - (i - y) / h; 
-                let shift = netBend * progress;
-                ctx.moveTo(x + shift, i); 
-                ctx.lineTo(x + w + shift, i); 
-            }
-            ctx.moveTo(x + netBend, y); ctx.lineTo(x, GROUND_Y); 
-            ctx.moveTo(x + w + netBend, y); ctx.lineTo(x + w, GROUND_Y); 
-            ctx.stroke();
-            
-            if (wallTimer > 0) {
-                ctx.shadowBlur = 15; ctx.shadowColor = "gold";
-                ctx.fillStyle = "#FFD700";
-            } else {
-                ctx.shadowBlur = 5; ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
-                ctx.fillStyle = "#fff";
-            }
-            
-            ctx.beginPath();
-            ctx.moveTo(x - 2 + netBend, y);
-            ctx.lineTo(x + w + 2 + netBend, y);
-            ctx.lineTo(x + w + 2 + netBend * 0.9, y + 12);
-            ctx.lineTo(x - 2 + netBend * 0.9, y + 12);
-            ctx.fill();
-
-            ctx.restore();
+            const x = 695; const w = 10; const h = (wallTimer > 0) ? 400 : 200; const y = GROUND_Y - h; 
+            netBendVel += -0.1 * netBend; netBendVel *= 0.9; netBend += netBendVel;
+            ctx.save(); ctx.fillStyle = "rgba(50, 50, 50, 0.4)"; ctx.beginPath(); ctx.moveTo(x + netBend, y); ctx.lineTo(x + w + netBend, y); ctx.lineTo(x + w, GROUND_Y); ctx.lineTo(x, GROUND_Y); ctx.fill();
+            ctx.strokeStyle = "rgba(220, 220, 220, 0.8)"; ctx.lineWidth = 1; ctx.beginPath(); for (let i = y; i <= GROUND_Y; i += 8) { let progress = 1 - (i - y) / h; let shift = netBend * progress; ctx.moveTo(x + shift, i); ctx.lineTo(x + w + shift, i); } ctx.moveTo(x + netBend, y); ctx.lineTo(x, GROUND_Y); ctx.moveTo(x + w + netBend, y); ctx.lineTo(x + w, GROUND_Y); ctx.stroke();
+            if (wallTimer > 0) { ctx.shadowBlur = 15; ctx.shadowColor = "gold"; ctx.fillStyle = "#FFD700"; } else { ctx.shadowBlur = 5; ctx.shadowColor = "rgba(255, 255, 255, 0.5)"; ctx.fillStyle = "#fff"; }
+            ctx.beginPath(); ctx.moveTo(x - 2 + netBend, y); ctx.lineTo(x + w + 2 + netBend, y); ctx.lineTo(x + w + 2 + netBend * 0.9, y + 12); ctx.lineTo(x - 2 + netBend * 0.9, y + 12); ctx.fill(); ctx.restore();
         }
 
         function createExplosion(x, y, color) { for(let i=0; i<12; i++) particles.push(new Particle(x, y, color)); }
@@ -1331,54 +820,19 @@
 
         function triggerFireShotSequence(player, ball) {
             if (ball.isRising || ball.isHolding) return;
-
-            ball.fireShooter = player;
-            ball.isRising = true; 
-            ball.isSuperSmash = false; 
-            ball.vx = 0; 
-            ball.vy = -20; 
-
-            showItemNotice("🔥 필살기 발동! 🔥");
-            createExplosion(player.x, player.y, "#FF0000");
+            ball.fireShooter = player; ball.isRising = true; ball.isSuperSmash = false; ball.vx = 0; ball.vy = -20; 
+            showItemNotice("🔥 필살기 발동! 🔥"); createExplosion(player.x, player.y, "#FF0000");
         }
 
         function fireScatterShot(ball) {
-            const player = ball.fireShooter;
-            if (!player) return;
-
-            showItemNotice("☄️ METEOR STORM! ☄️");
-            shakeDuration = 60; 
-
-            charEffects.push(new Shockwave(ball.x, ball.y, "#FF0000"));
-            charEffects.push(new Shockwave(ball.x, ball.y, "#FFFF00"));
-
-            const startX = player.side === 'left' ? 700 : 700;
-            const endX = player.side === 'left' ? 1400 : 0;
-            const courtWidth = Math.abs(endX - startX);
-            const gap = courtWidth / 6;
-            const realBallIndex = 2; 
-
+            const player = ball.fireShooter; if (!player) return;
+            powerBestSound.currentTime = 0; powerBestSound.play().catch(()=>{}); showItemNotice("☄️ METEOR STORM! ☄️"); shakeDuration = 60; 
+            charEffects.push(new Shockwave(ball.x, ball.y, "#FF0000")); charEffects.push(new Shockwave(ball.x, ball.y, "#FFFF00"));
+            const startX = player.side === 'left' ? 700 : 700; const endX = player.side === 'left' ? 1400 : 0; const courtWidth = Math.abs(endX - startX); const gap = courtWidth / 6; const realBallIndex = 2; 
             for(let i = 0; i < 5; i++) {
-                let targetX;
-                if (player.side === 'left') { targetX = 700 + (gap * (i + 1)); } 
-                else { targetX = 700 - (gap * (i + 1)); }
-
-                const timeToHit = 30; 
-                const targetY = 750;
-                
-                const vx = (targetX - ball.x) / timeToHit;
-                const vy = (targetY - ball.y) / timeToHit - (0.5 * (GRAVITY * ball.mass) * timeToHit);
-
-                if (i === realBallIndex) {
-                    ball.vx = vx * GAME_SPEED_RATIO;
-                    ball.vy = vy * GAME_SPEED_RATIO;
-                    ball.isFireShot = true; 
-                } else {
-                    let fb = new FakeBall(ball.x, ball.y, "#FF4500");
-                    fb.vx = vx * GAME_SPEED_RATIO;
-                    fb.vy = vy * GAME_SPEED_RATIO;
-                    fakeBalls.push(fb);
-                }
+                let targetX; if (player.side === 'left') { targetX = 700 + (gap * (i + 1)); } else { targetX = 700 - (gap * (i + 1)); }
+                const timeToHit = 30; const targetY = 750; const vx = (targetX - ball.x) / timeToHit; const vy = (targetY - ball.y) / timeToHit - (0.5 * (GRAVITY * ball.mass) * timeToHit);
+                if (i === realBallIndex) { ball.vx = vx * GAME_SPEED_RATIO; ball.vy = vy * GAME_SPEED_RATIO; ball.isFireShot = true; } else { let fb = new FakeBall(ball.x, ball.y, "#FF4500"); fb.vx = vx * GAME_SPEED_RATIO; fb.vy = vy * GAME_SPEED_RATIO; fakeBalls.push(fb); }
             }
             createExplosion(ball.x, ball.y, "#FFFFFF");
         }
@@ -1387,481 +841,159 @@
             if (gameState !== 'playing') return;
             if (cinematicTimer > 0) return; 
 
-            let hitCenterX = p.x + DISPLAY_W/2;
-            let hitCenterY = p.y + DISPLAY_H/2;
-            
-            if (p.chickenTimer > 0) {
-                const distLeft = Math.abs((p.x + DISPLAY_W/2 - 70) - b.x);
-                const distCenter = Math.abs((p.x + DISPLAY_W/2) - b.x);
-                const distRight = Math.abs((p.x + DISPLAY_W/2 + 70) - b.x);
-                const minDist = Math.min(distLeft, distCenter, distRight);
-                if (minDist === distLeft) hitCenterX -= 70;
-                else if (minDist === distRight) hitCenterX += 70;
+            let hitCenterX = p.x + DISPLAY_W/2; let hitCenterY = p.y + DISPLAY_H/2;
+            if (p.chickenTimer > 0 && !p.isGoldenChicken) {
+                const distLeft = Math.abs((p.x + DISPLAY_W/2 - 70) - b.x); const distCenter = Math.abs((p.x + DISPLAY_W/2) - b.x); const distRight = Math.abs((p.x + DISPLAY_W/2 + 70) - b.x);
+                const minDist = Math.min(distLeft, distCenter, distRight); if (minDist === distLeft) hitCenterX -= 70; else if (minDist === distRight) hitCenterX += 70;
             }
 
-            let dx = hitCenterX - b.x; 
-            let dy = hitCenterY - b.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
+            let dx = hitCenterX - b.x; let dy = hitCenterY - b.y; let dist = Math.sqrt(dx*dx + dy*dy);
             
             if (dist < DISPLAY_W/2 + b.radius) { 
+                // ▼ [수정] 저스트 가드(방어) 로직 개선 (꾹 누르면 뚫림)
+                // 키를 누른지 12프레임(약 0.2초) 이내일 때 '저스트 가드' 인정
+                // 이전 30프레임(0.5초)은 너무 길어서 누르고 있어도 되는 느낌이었음.
+                const isJustGuardTiming = keys[p.controls.down] && p.guardPressTimer > 0 && p.guardPressTimer < 12;
                 
-                // ★ [2. 저스트 가드 시스템]
-                // 상대방의 강력한 공격(슈퍼스매시, 불꽃슛)이 들어올 때
                 if (b.isSuperSmash || b.isFireShot || (Math.abs(b.vx) > 15)) {
-                    // 키를 누르고 있는 상태에서 충돌하면 '저스트 가드' 판정
-                    if (keys[p.controls.down]) {
-                        b.isSuperSmash = false;
-                        b.isFireShot = false;
-                        
-                        // 공 반사 (Reflect)
-                        b.vx = p.side === 'left' ? 25 : -25;
-                        b.vy = -15;
-
-                        // 이펙트 및 사운드
-                        createExplosion(b.x, b.y, "#00FFFF"); // 청색 폭발
-                        charEffects.push(new Shockwave(b.x, b.y, "#00FFFF"));
+                    if (isJustGuardTiming) {
+                        b.isSuperSmash = false; b.isFireShot = false; b.vx = p.side === 'left' ? 25 : -25; b.vy = -15;
+                        createExplosion(b.x, b.y, "#00FFFF"); charEffects.push(new Shockwave(b.x, b.y, "#00FFFF"));
                         strikingSound.currentTime = 0; strikingSound.play().catch(()=>{});
-                        
-                        hitStopTimer = 10; // 임팩트 정지
-                        shakeDuration = 10;
-                        
-                        // 게이지 보너스
-                        p.gauge = Math.min(p.gauge + 30, p.maxGauge);
+                        hitStopTimer = 10; shakeDuration = 10; p.gauge = Math.min(p.gauge + 30, p.maxGauge);
                         showItemNotice("🛡️ JUST GUARD! 🛡️");
-                        return; // 일반 피격 로직 무시
+                        return;
                     } else {
-                        // 방어 실패 시 (기존 로직)
-                        p.stunTimer = 60; 
-                        p.isSmashHit = true; 
-                        p.vx = p.side === 'left' ? -20 : 20; 
-                        createExplosion(p.x + DISPLAY_W/2, p.y + DISPLAY_H/2, "red");
-                        showItemNotice("💥 뚫렸다!! 💥");
+                        // 키를 꾹 누르고 있거나 안 눌렀을 때 -> 뚫림
+                        p.stunTimer = 60; p.isSmashHit = true; p.vx = p.side === 'left' ? -20 : 20; 
+                        createExplosion(p.x + DISPLAY_W/2, p.y + DISPLAY_H/2, "red"); 
+                        
+                        // 피드백 메시지 추가
+                        if(keys[p.controls.down]) showItemNotice("💥 타이밍 늦음! (꾹 누름) 💥");
+                        else showItemNotice("💥 뚫렸다!! 💥");
+                        
                         bombSound.play().catch(()=>{});
                         return;
                     }
                 }
 
                 hitSound.currentTime = 0; hitSound.play().catch(()=>{});
-                rallyCount++;
-                if(rallyCount >= 3) { showItemNotice(`🔥 ${rallyCount} Combo! 🔥`); }
+                rallyCount++; if(rallyCount >= 3) { showItemNotice(`🔥 ${rallyCount} Combo! 🔥`); }
+                const effectColor = p.side === 'left' ? '#00d2ff' : '#ff5e62'; createCharEffect(p.x + DISPLAY_W/2, p.y + DISPLAY_H/2, effectColor);
+                b.vy = -9 * GAME_SPEED_RATIO; b.vx = (b.x - hitCenterX) * 0.09 * GAME_SPEED_RATIO; 
+                const randomWords = ["POW!", "BAM!", "HIT!", "SMASH!", "BANG!"]; const text = randomWords[Math.floor(Math.random() * randomWords.length)]; hitTexts.push(new HitText(b.x, b.y - 50, text, effectColor));
 
-                const effectColor = p.side === 'left' ? '#00d2ff' : '#ff5e62';
-                createCharEffect(p.x + DISPLAY_W/2, p.y + DISPLAY_H/2, effectColor);
-                b.vy = -9 * GAME_SPEED_RATIO; 
-                b.vx = (b.x - hitCenterX) * 0.09 * GAME_SPEED_RATIO; 
-                
-                const randomWords = ["POW!", "BAM!", "HIT!", "SMASH!", "BANG!"];
-                const text = randomWords[Math.floor(Math.random() * randomWords.length)];
-                hitTexts.push(new HitText(b.x, b.y - 50, text, effectColor));
-
-                if (keys[p.controls.down] && p.gauge >= 100) { 
-                    startCinematicSmash(p, b, p.isJumping);
-                    return; 
-                }
-
+                if (keys[p.controls.down] && p.gauge >= 100) { startCinematicSmash(p, b, p.isJumping); return; }
                 p.gauge = Math.min(p.gauge + 15, p.maxGauge);
-
                 if (p.name === "돈까스할매") { for(let i=0; i<8; i++) particles.push(new Particle(b.x, b.y, "#FF4500")); createExplosion(b.x, b.y, "#FFD700"); }
                 
                 if (keys[p.controls.down]) { 
-                    if (p.fireMultiBallTimer > 0) {
-                         triggerFireShotSequence(p, b);
-                         return;
-                    }
-
-                    hitStopTimer = 6; 
-                    shakeDuration = 20; 
-                    b.isFireShot = false; 
-                    b.vx = ((p.side === 'left' ? 13 : -13) * p.power) * GAME_SPEED_RATIO; 
-                    b.vy = 6 * GAME_SPEED_RATIO; 
-                    createExplosion(b.x, b.y, "#FFD700"); 
-                } else { 
-                    b.isFireShot = false; 
-                    createExplosion(b.x, b.y, "rgba(255, 255, 255, 0.5)"); 
-                }
+                    if (p.fireMultiBallTimer > 0) { triggerFireShotSequence(p, b); return; }
+                    hitStopTimer = 6; shakeDuration = 20; b.isFireShot = false; b.vx = ((p.side === 'left' ? 13 : -13) * p.power) * GAME_SPEED_RATIO; b.vy = 6 * GAME_SPEED_RATIO; createExplosion(b.x, b.y, "#FFD700"); 
+                } else { b.isFireShot = false; createExplosion(b.x, b.y, "rgba(255, 255, 255, 0.5)"); }
                 b.isSuperSmash = false;
             }
         }
 
-        function startCinematicSmash(player, ballObj, isJump) {
-            cinematicTimer = 60; 
-            cinematicPlayer = player;
-            player.gauge = 0; 
-            player.isJumpSmash = isJump;
-            cinematicSound.currentTime = 0; cinematicSound.play().catch(()=>{});
-        }
-
+        function startCinematicSmash(player, ballObj, isJump) { cinematicTimer = 60; cinematicPlayer = player; player.gauge = 0; player.isJumpSmash = isJump; cinematicSound.currentTime = 0; cinematicSound.play().catch(()=>{}); }
         function executeSuperSmash(player, ballObj) {
-            if (player.fireMultiBallTimer > 0) {
-                triggerFireShotSequence(player, ballObj);
-                return;
-            }
-
-            ballObj.isSuperSmash = true;
-            shakeDuration = 60; 
-            
-            createExplosion(ballObj.x, ballObj.y, "#FF0000");
-            createExplosion(ballObj.x, ballObj.y, "#FFFF00");
-            createCharEffect(ballObj.x, ballObj.y, "#FFFFFF");
-
-            ballObj.smashStart = { x: ballObj.x, y: ballObj.y };
-            let targetX = player.side === 'left' ? 1320 : 80;
-            ballObj.smashEnd = { x: targetX, y: 750 }; 
-            ballObj.smashControl = { x: 700, y: -350 }; 
-            ballObj.smashTimer = 0;
-            ballObj.smashDuration = 35 / GAME_SPEED_RATIO; 
-            
-            if (player.isJumpSmash) {
-                ballObj.radius = 20;
-                for(let i=0; i<50; i++) {
-                    let px = player.x + DISPLAY_W/2; 
-                    let py = player.y + DISPLAY_H/2;
-                    let p = new Particle(px, py, i % 2 === 0 ? "#FF4500" : "#FFFF00");
-                    p.vx *= 2; 
-                    p.vy *= 2;
-                    particles.push(p); 
-                }
-                ballObj.color = "#FFF"; 
-                showItemNotice(`⚡ ULTRA SUPER SMASH!!! ⚡`);
-            } else {
-                showItemNotice(`⚡ SUPER SMASH!!! ⚡`);
-            }
+            if (player.fireMultiBallTimer > 0) { triggerFireShotSequence(player, ballObj); return; }
+            ballObj.isSuperSmash = true; shakeDuration = 60; 
+            createExplosion(ballObj.x, ballObj.y, "#FF0000"); createExplosion(ballObj.x, ballObj.y, "#FFFF00"); createCharEffect(ballObj.x, ballObj.y, "#FFFFFF");
+            ballObj.smashStart = { x: ballObj.x, y: ballObj.y }; let targetX = player.side === 'left' ? 1320 : 80; ballObj.smashEnd = { x: targetX, y: 750 }; ballObj.smashControl = { x: 700, y: -350 }; ballObj.smashTimer = 0; ballObj.smashDuration = 35 / GAME_SPEED_RATIO; 
+            if (player.isJumpSmash) { ballObj.radius = 20; for(let i=0; i<50; i++) { let px = player.x + DISPLAY_W/2; let py = player.y + DISPLAY_H/2; let p = new Particle(px, py, i % 2 === 0 ? "#FF4500" : "#FFFF00"); p.vx *= 2; p.vy *= 2; particles.push(p); } ballObj.color = "#FFF"; showItemNotice(`⚡ ULTRA SUPER SMASH!!! ⚡`); } else { showItemNotice(`⚡ SUPER SMASH!!! ⚡`); }
         }
 
-        function checkItemCollection(player) {
-            items.forEach(item => { if (!item.active) return; let px = player.x + DISPLAY_W/2; let py = player.y + DISPLAY_H/2; let dx = px - item.x; let dy = py - item.y; if (Math.sqrt(dx*dx + dy*dy) < 80) { item.active = false; applyItemEffect(player, item); } });
-        }
-
+        function checkItemCollection(player) { items.forEach(item => { if (!item.active) return; let px = player.x + DISPLAY_W/2; let py = player.y + DISPLAY_H/2; let dx = px - item.x; let dy = py - item.y; if (Math.sqrt(dx*dx + dy*dy) < 80) { item.active = false; applyItemEffect(player, item); } }); }
         function applyItemEffect(player, item) {
-            const type = item.type;
-            const opponent = player.side === 'left' ? p2 : p1;
-
-            if (type === 'SPEED') { 
-                speedSound.play().catch(()=>{});
-                player.moveSpeed = player.baseSpeed * 2; showItemNotice(`⚡ ${player.name} 스피드 업! ⚡`); setTimeout(() => { player.moveSpeed = player.baseSpeed; }, 8000); 
-            } 
-            else if (type === 'JUMP') { 
-                player.jumpForce = player.baseJumpForce * 1.5; 
-                player.hasJumpBuff = true; 
-                showItemNotice(`🚀 ${player.name} 슈퍼 점프! 🚀`); 
-                setTimeout(() => { 
-                    player.jumpForce = player.baseJumpForce; 
-                    player.hasJumpBuff = false; 
-                }, 8000); 
-            } 
-            else if (type === 'BIG') {
-                if (bigBallTimer) clearTimeout(bigBallTimer);
-                ball.mushroomCount++;
-                bigBallSound.play().catch(()=>{}); 
-                if (ball.mushroomCount === 1) { ball.radius = 70; ball.mass = 1.3; ball.color = "#FF7F50"; showItemNotice("🏐 공이 커졌다! (2배) 🏐"); }
-                else if (ball.mushroomCount >= 2) { ball.radius = 105; ball.mass = 1.6; ball.color = "#FF4500"; showItemNotice("🏐🏐 엄청 커졌다! (3배) 🏐🏐"); }
-                if (ball.mushroomCount > 0) { bigBallTimer = setTimeout(() => { ball.radius = BALL_R; ball.mass = 1; ball.color = ball.defaultColor; ball.mushroomCount = 0; }, 10000); }
-            } 
-            else if (type === 'BONUS') { 
-                coinSound.play().catch(()=>{}); 
-                if (player.side === 'left') { score.p1++; scoreP1.innerText = score.p1; } else { score.p2++; scoreP2.innerText = score.p2; } showItemNotice("💎 보너스 점수! 💎"); 
-            }
-            else if (type === 'BANANA') { 
-                stampSound.play().catch(()=>{}); 
-                player.stunTimer = 90; showItemNotice(`🍌 ${player.name} 미끄러짐! 🍌`); 
-            }
-            else if (type === 'POOP') { 
-                poopSound.play().catch(()=>{}); 
-                player.poopTimer = 180; showItemNotice(`💩 ${player.name} 똥 밟음! 💩`); 
-            }
-            else if (type === 'GIANT') { 
-                giantSound.play().catch(()=>{}); 
-                player.scale = 2.0; showItemNotice(`🍄 ${player.name} 거대화! 🍄`); setTimeout(() => { player.scale = 1.0; }, 8000); 
-            }
-            else if (type === 'DWARF') { 
-                dwarfSound.play().catch(()=>{}); 
-                opponent.scale = 0.5; showItemNotice(`👶 ${opponent.name} 작아짐! 👶`); setTimeout(() => { opponent.scale = 1.0; }, 8000); 
-            }
-            else if (type === 'ICE') {
-                iceSound.play().catch(()=>{}); 
-                opponent.frozenTimer = 120; 
-                showItemNotice(`❄️ ${opponent.name} 꽁꽁 얼음! ❄️`);
-            }
-            else if (type === 'CONFUSION') {
-                confusionSound.play().catch(()=>{}); 
-                opponent.confusedTimer = 180; 
-                showItemNotice(`😵 ${opponent.name} 어질어질~ 😵`);
-            }
-            else if (type === 'BOMB') {
-                bombSound.play().catch(()=>{});
-                player.stunTimer = 120; 
-                player.vy = -15; 
-                createExplosion(player.x + DISPLAY_W/2, player.y + DISPLAY_H/2, "red");
-                showItemNotice(`💣 ${player.name} 폭발!!! 💣`);
-            }
-            else if (type === 'BLACKOUT') {
-                blackoutTimer = 300; 
-                showItemNotice(`🌑 정전 발생! 앞이 안 보여! 🌑`);
-            }
-            else if (type === 'TYPHOON') {
-                windSound.play().catch(()=>{});
-                typhoonTimer = 400; 
-                windDirection = Math.random() < 0.5 ? -1 : 1; 
-                const dirText = windDirection < 0 ? "<<< 서풍" : "동풍 >>>";
-                showItemNotice(`🌪️ 태풍 발생! (${dirText}) 🌪️`);
-            }
-            else if (type === 'GHOST') {
-                ghostSound.play().catch(()=>{});
-                ghostBallTimer = 400; 
-                showItemNotice(`👻 공이 유령으로 변했다! 👻`);
-            }
-            else if (type === 'INK') {
-                bombSound.play().catch(()=>{}); 
-                for(let i=0; i<5; i++) inkSplotches.push(new InkSplotch());
-                showItemNotice(`🦑 먹물 뿌리기! 🦑`);
-            }
-            else if (type === 'CLONE') {
-                ghostSound.play().catch(()=>{}); 
-                for(let i=0; i<4; i++) {
-                    let fb = new FakeBall(ball.x, ball.y, ball.color);
-                    fb.vx = ball.vx + (Math.random() - 0.5) * 4; 
-                    fb.vy = ball.vy + (Math.random() - 0.5) * 4;
-                    fakeBalls.push(fb);
-                }
-                showItemNotice(`🤥 분신술 대소동! (진짜를 찾아라!) 🤥`);
-            }
-            else if (type === 'WALL') {
-                giantSound.play().catch(()=>{}); 
-                wallTimer = 600; 
-                showItemNotice(`🧱 철벽 방어! 네트 상승! 🧱`);
-            }
-            else if (type === 'CHICKEN') {
-                giantSound.play().catch(()=>{}); 
-                player.chickenTimer = 1200; 
-                showItemNotice(`🐔 꼬꼬댁 군단! (3마리!) 🐔`);
-            }
-            else if (type === 'FIRE') {
-                giantSound.play().catch(()=>{});
-                player.fireMultiBallTimer = 600; // 10초
-                showItemNotice(`🔥 불꽃 아이템 획득! (S키: 필살기) 🔥`);
-            }
+            const type = item.type; const opponent = player.side === 'left' ? p2 : p1;
+            if (type === 'SPEED') { speedSound.play().catch(()=>{}); player.moveSpeed = player.baseSpeed * 2; showItemNotice(`⚡ ${player.name} 스피드 업! ⚡`); setTimeout(() => { player.moveSpeed = player.baseSpeed; }, 8000); } 
+            else if (type === 'JUMP') { player.jumpForce = player.baseJumpForce * 1.5; player.hasJumpBuff = true; showItemNotice(`🚀 ${player.name} 슈퍼 점프! 🚀`); setTimeout(() => { player.jumpForce = player.baseJumpForce; player.hasJumpBuff = false; }, 8000); } 
+            else if (type === 'BIG') { if (bigBallTimer) clearTimeout(bigBallTimer); ball.mushroomCount++; bigBallSound.play().catch(()=>{}); if (ball.mushroomCount === 1) { ball.radius = 70; ball.mass = 1.3; ball.color = "#FF7F50"; showItemNotice("🏐 공이 커졌다! (2배) 🏐"); } else if (ball.mushroomCount >= 2) { ball.radius = 105; ball.mass = 1.6; ball.color = "#FF4500"; showItemNotice("🏐🏐 엄청 커졌다! (3배) 🏐🏐"); } if (ball.mushroomCount > 0) { bigBallTimer = setTimeout(() => { ball.radius = BALL_R; ball.mass = 1; ball.color = ball.defaultColor; ball.mushroomCount = 0; }, 10000); } } 
+            else if (type === 'BONUS') { coinSound.play().catch(()=>{}); if (player.side === 'left') { score.p1++; scoreP1.innerText = score.p1; } else { score.p2++; scoreP2.innerText = score.p2; } showItemNotice("💎 보너스 점수! 💎"); }
+            else if (type === 'BANANA') { stampSound.play().catch(()=>{}); player.stunTimer = 90; showItemNotice(`🍌 ${player.name} 미끄러짐! 🍌`); }
+            else if (type === 'POOP') { poopSound.play().catch(()=>{}); player.poopTimer = 180; showItemNotice(`💩 ${player.name} 똥 밟음! 💩`); }
+            else if (type === 'GIANT') { giantSound.play().catch(()=>{}); player.scale = 2.0; showItemNotice(`🍄 ${player.name} 거대화! 🍄`); setTimeout(() => { player.scale = 1.0; }, 8000); }
+            else if (type === 'DWARF') { dwarfSound.play().catch(()=>{}); opponent.scale = 0.5; showItemNotice(`👶 ${opponent.name} 작아짐! 👶`); setTimeout(() => { opponent.scale = 1.0; }, 8000); }
+            else if (type === 'ICE') { iceSound.play().catch(()=>{}); opponent.frozenTimer = 120; showItemNotice(`❄️ ${opponent.name} 꽁꽁 얼음! ❄️`); }
+            else if (type === 'CONFUSION') { confusionSound.play().catch(()=>{}); opponent.confusedTimer = 180; showItemNotice(`😵 ${opponent.name} 어질어질~ 😵`); }
+            else if (type === 'BOMB') { bombSound.play().catch(()=>{}); player.stunTimer = 120; player.vy = -15; createExplosion(player.x + DISPLAY_W/2, player.y + DISPLAY_H/2, "red"); showItemNotice(`💣 ${player.name} 폭발!!! 💣`); }
+            else if (type === 'BLACKOUT') { blackoutTimer = 300; showItemNotice(`🌑 정전 발생! 앞이 안 보여! 🌑`); }
+            else if (type === 'TYPHOON') { windSound.play().catch(()=>{}); typhoonTimer = 400; windDirection = Math.random() < 0.5 ? -1 : 1; const dirText = windDirection < 0 ? "<<< 서풍" : "동풍 >>>"; showItemNotice(`🌪️ 태풍 발생! (${dirText}) 🌪️`); }
+            else if (type === 'GHOST') { ghostSound.play().catch(()=>{}); ghostBallTimer = 400; showItemNotice(`👻 공이 유령으로 변했다! 👻`); }
+            else if (type === 'INK') { bombSound.play().catch(()=>{}); for(let i=0; i<5; i++) inkSplotches.push(new InkSplotch()); showItemNotice(`🦑 먹물 뿌리기! 🦑`); }
+            else if (type === 'CLONE') { ghostSound.play().catch(()=>{}); for(let i=0; i<4; i++) { let fb = new FakeBall(ball.x, ball.y, ball.color); fb.vx = ball.vx + (Math.random() - 0.5) * 4; fb.vy = ball.vy + (Math.random() - 0.5) * 4; fakeBalls.push(fb); } showItemNotice(`🤥 분신술 대소동! (진짜를 찾아라!) 🤥`); }
+            else if (type === 'WALL') { giantSound.play().catch(()=>{}); wallTimer = 600; showItemNotice(`🧱 철벽 방어! 네트 상승! 🧱`); }
+            else if (type === 'CHICKEN') { giantSound.play().catch(()=>{}); if (Math.random() < 0.3) { player.isGoldenChicken = true; player.chickenTimer = 1200; player.moveSpeed = player.baseSpeed * 2; showItemNotice(`🌟 황금닭 변신! (스피드 UP!) 🌟`); } else { player.chickenTimer = 1200; showItemNotice(`🐔 꼬꼬댁 군단! (3마리!) 🐔`); } }
+            else if (type === 'FIRE') { giantSound.play().catch(()=>{}); player.fireMultiBallTimer = 600; showItemNotice(`🔥 불꽃 아이템 획득! (S키: 필살기) 🔥`); }
         }
 
         function resetGame() {
-            score.p1 = 0; score.p2 = 0;
-            scoreP1.innerText = 0; scoreP2.innerText = 0;
-            lastMaxScore = 0; rallyCount = 0;
-            isGameOver = false; ball.reset('left'); items = [];
+            score.p1 = 0; score.p2 = 0; scoreP1.innerText = 0; scoreP2.innerText = 0; lastMaxScore = 0; rallyCount = 0; isGameOver = false; ball.reset('left'); items = [];
             p1.moveSpeed = p1.baseSpeed; p1.gauge = 0; p1.scale = 1; p1.angle = 0; p1.stunTimer = 0; p1.poopTimer = 0; p1.hasJumpBuff = false; p1.frozenTimer = 0; p1.confusedTimer = 0;
+            blackoutTimer = 0; typhoonTimer = 0; ghostBallTimer = 0; cinematicTimer = 0; wallTimer = 0; slowMotionTimer = 0; 
+            p1.chickenTimer = 0; p2.chickenTimer = 0; p1.isGoldenChicken = false; p2.isGoldenChicken = false;
+            inkSplotches = []; fakeBalls = []; hitStopTimer = 0; dusts = []; netBend = 0; netBendVel = 0;
+            p1.fireMultiBallTimer = 0; p2.fireMultiBallTimer = 0;
             
-            blackoutTimer = 0;
-            typhoonTimer = 0;
-            ghostBallTimer = 0;
-            cinematicTimer = 0;
-            
-            wallTimer = 0;
-            slowMotionTimer = 0;
-            p1.chickenTimer = 0;
-            p2.chickenTimer = 0;
-            inkSplotches = [];
-            fakeBalls = [];
-            hitStopTimer = 0;
-            dusts = [];
-            netBend = 0;
-            netBendVel = 0;
-            // 리셋
-            p1.fireMultiBallTimer = 0;
-            p2.fireMultiBallTimer = 0;
+            // 스킬 초기화
+            p1.skillCooldown = 0; p2.skillCooldown = 0;
 
-            bgMusic.currentTime = 0; bgMusic.play();
-            bgMusic.playbackRate = 1.0; 
-
+            bgMusic.currentTime = 0; bgMusic.play(); bgMusic.playbackRate = 1.0; 
             if (bigBallTimer) clearTimeout(bigBallTimer);
             startCountdown();
         }
 
         function loop() {
             frameCount++;
-            
-            if (isVsAI && aiBrain && gameState === 'playing' && cinematicTimer <= 0) {
-                const currentNetHeight = (wallTimer > 0) ? 400 : 200;
-                aiBrain.update(p2, ball, currentNetHeight);
-            }
+            if (isVsAI && aiBrain && gameState === 'playing' && cinematicTimer <= 0) { const currentNetHeight = (wallTimer > 0) ? 400 : 200; aiBrain.update(p2, ball, currentNetHeight); }
+            if (cinematicTimer === 0) { if (!isGameOver && Math.random() < 0.003) items.push(new Item()); if (blackoutTimer > 0) blackoutTimer--; if (typhoonTimer > 0) typhoonTimer--; if (ghostBallTimer > 0) ghostBallTimer--; if (wallTimer > 0) wallTimer--; }
+            if (hitStopTimer > 0) { hitStopTimer--; }
+            if(gameStarted) { camera.update(ball); }
 
-            if (cinematicTimer === 0) {
-                if (!isGameOver && Math.random() < 0.003) items.push(new Item());
-                if (blackoutTimer > 0) blackoutTimer--;
-                if (typhoonTimer > 0) typhoonTimer--;
-                if (ghostBallTimer > 0) ghostBallTimer--;
-                if (wallTimer > 0) wallTimer--; 
-            }
-
-            if (hitStopTimer > 0) {
-                hitStopTimer--;
-            }
-
-            // [카메라 업데이트]
-            if(gameStarted) {
-                camera.update(ball);
-            }
-
-            let shakeX = 0; let shakeY = 0;
-            if (shakeDuration > 0) { shakeX = (Math.random() - 0.5) * 10; shakeY = (Math.random() - 0.5) * 10; shakeDuration--; }
-            
-            // ★ [카메라 적용 시작]
-            // 화면 전체를 지웁니다.
-            ctx.clearRect(0, 0, 1400, 800);
-            ctx.save(); 
-            ctx.translate(shakeX, shakeY); // 쉐이크 적용
-            camera.apply(ctx); // 카메라 줌/이동 적용
-            
-            if (images.bg && images.bg.complete) { ctx.drawImage(images.bg, 0, 0, 1400, 800); } 
-            else { ctx.fillStyle = "#1e3c72"; ctx.fillRect(0, 0, 1400, 800); }
+            let shakeX = 0; let shakeY = 0; if (shakeDuration > 0) { shakeX = (Math.random() - 0.5) * 10; shakeY = (Math.random() - 0.5) * 10; shakeDuration--; }
+            ctx.clearRect(0, 0, 1400, 800); ctx.save(); ctx.translate(shakeX, shakeY); camera.apply(ctx); 
+            if (images.bg && images.bg.complete) { ctx.drawImage(images.bg, 0, 0, 1400, 800); } else { ctx.fillStyle = "#1e3c72"; ctx.fillRect(0, 0, 1400, 800); }
             ctx.fillStyle = "rgba(230, 200, 150, 0.8)"; ctx.fillRect(0, 750, 1400, 50);
-            
             drawNet();
 
-            if ((score.p1 === WIN_SCORE - 1 || score.p2 === WIN_SCORE - 1) && !isGameOver) {
-                if (bgMusic.playbackRate === 1.0) bgMusic.playbackRate = 1.3;
+            if ((score.p1 === WIN_SCORE - 1 || score.p2 === WIN_SCORE - 1) && !isGameOver) { if (bgMusic.playbackRate === 1.0) bgMusic.playbackRate = 1.3; const centerX = ball.x; const centerY = ball.y; const gradient = ctx.createRadialGradient(centerX, centerY, 100, centerX, centerY, 800); gradient.addColorStop(0, "rgba(0,0,0,0)"); gradient.addColorStop(0.2, "rgba(0,0,0,0.3)"); gradient.addColorStop(1, "rgba(0,0,0,0.85)"); ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1400, 800); } 
+            else { if (!isGameOver && bgMusic.playbackRate !== 1.0) bgMusic.playbackRate = 1.0; }
 
-                const centerX = ball.x;
-                const centerY = ball.y;
-                const gradient = ctx.createRadialGradient(centerX, centerY, 100, centerX, centerY, 800);
-                gradient.addColorStop(0, "rgba(0,0,0,0)");
-                gradient.addColorStop(0.2, "rgba(0,0,0,0.3)");
-                gradient.addColorStop(1, "rgba(0,0,0,0.85)"); 
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, 1400, 800);
-            } else {
-                if (!isGameOver && bgMusic.playbackRate !== 1.0) bgMusic.playbackRate = 1.0;
-            }
+            let doUpdate = true; if (slowMotionTimer > 0) { slowMotionTimer--; if (frameCount % 3 !== 0) doUpdate = false; } if (hitStopTimer > 0) doUpdate = false;
 
-            let doUpdate = true;
-            if (slowMotionTimer > 0) {
-                slowMotionTimer--;
-                if (frameCount % 3 !== 0) doUpdate = false; 
-            }
-            if (hitStopTimer > 0) doUpdate = false;
-
-            for (let i = dusts.length - 1; i >= 0; i--) {
-                if(doUpdate) dusts[i].update();
-                dusts[i].draw();
-                if (dusts[i].life <= 0) dusts.splice(i, 1);
-            }
-
+            for (let i = dusts.length - 1; i >= 0; i--) { if(doUpdate) dusts[i].update(); dusts[i].draw(); if (dusts[i].life <= 0) dusts.splice(i, 1); }
             for (let i = charEffects.length - 1; i >= 0; i--) { if(doUpdate) charEffects[i].update(); charEffects[i].draw(); if (charEffects[i].alpha <= 0) charEffects.splice(i, 1); }
             for (let i = particles.length - 1; i >= 0; i--) { if(doUpdate) particles[i].update(); particles[i].draw(); if (particles[i].life <= 0) particles.splice(i, 1); }
             for (let i = items.length - 1; i >= 0; i--) { if(doUpdate) items[i].update(); items[i].draw(); if (!items[i].active) items.splice(i, 1); }
             for (let i = confettis.length - 1; i >= 0; i--) { if(doUpdate) confettis[i].update(); confettis[i].draw(); }
             for (let i = reactions.length - 1; i >= 0; i--) { if(doUpdate) reactions[i].update(); reactions[i].draw(); if(reactions[i].life<=0) reactions.splice(i,1); }
             for (let i = hitTexts.length - 1; i >= 0; i--) { if(doUpdate) hitTexts[i].update(); hitTexts[i].draw(); if(hitTexts[i].life<=0) hitTexts.splice(i,1); }
+            for (let i = fakeBalls.length - 1; i >= 0; i--) { if(doUpdate) fakeBalls[i].update(); fakeBalls[i].draw(); if (!fakeBalls[i].active) fakeBalls.splice(i, 1); }
 
-            for (let i = fakeBalls.length - 1; i >= 0; i--) { 
-                if(doUpdate) fakeBalls[i].update(); 
-                fakeBalls[i].draw(); 
-                if (!fakeBalls[i].active) fakeBalls.splice(i, 1); 
-            }
-
-            if(gameStarted) {
-                if (doUpdate) {
-                    p1.update(); p2.update(); ball.update();
-                    checkHit(p1, ball); checkHit(p2, ball);
-                    checkItemCollection(p1); checkItemCollection(p2); 
-                }
-                p1.draw(); p2.draw(); ball.draw();
-            }
-            
-            if (blackoutTimer > 0) {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.92)"; 
-                ctx.fillRect(0, 0, 1400, 800);
-                if (Math.floor(Date.now() / 500) % 2 === 0) {
-                    ctx.font = "50px 'Black Han Sans'"; ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.fillText("⚠️ 정전 발생! ⚠️", 700, 400);
-                }
-            }
-
-            for (let i = inkSplotches.length - 1; i >= 0; i--) {
-                if(doUpdate) inkSplotches[i].update();
-                inkSplotches[i].draw();
-                if (inkSplotches[i].life <= 0) inkSplotches.splice(i, 1);
-            }
+            if(gameStarted) { if (doUpdate) { p1.update(); p2.update(); ball.update(); checkHit(p1, ball); checkHit(p2, ball); checkItemCollection(p1); checkItemCollection(p2); } p1.draw(); p2.draw(); ball.draw(); }
+            if (blackoutTimer > 0) { ctx.fillStyle = "rgba(0, 0, 0, 0.92)"; ctx.fillRect(0, 0, 1400, 800); if (Math.floor(Date.now() / 500) % 2 === 0) { ctx.font = "50px 'Black Han Sans'"; ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.fillText("⚠️ 정전 발생! ⚠️", 700, 400); } }
+            for (let i = inkSplotches.length - 1; i >= 0; i--) { if(doUpdate) inkSplotches[i].update(); inkSplotches[i].draw(); if (inkSplotches[i].life <= 0) inkSplotches.splice(i, 1); }
             
             if (cinematicTimer > 0) {
-                cinematicTimer--;
-                
-                ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-                ctx.fillRect(0, 0, 1400, 800);
-                
-                ctx.save();
-                ctx.translate(cinematicPlayer.x + DISPLAY_W/2, cinematicPlayer.y + DISPLAY_H/2);
-                for(let i=0; i<10; i++) {
-                    ctx.rotate(Math.random() * Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.5})`;
-                    ctx.fillRect(50, -2, 800, 4);
-                }
-                ctx.restore();
-
-                ctx.save();
-                const scale = 1 + (60 - cinematicTimer) / 20; 
-                ctx.translate(700, 400); ctx.scale(scale, scale);
-                ctx.font = "bold 80px 'Black Han Sans'";
-                ctx.fillStyle = "#00FFFF"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                ctx.shadowColor = "blue"; ctx.shadowBlur = 30;
-                ctx.fillText("SUPER SMASH!!", 0, 0);
-                ctx.strokeStyle = "white"; ctx.lineWidth = 4; ctx.strokeText("SUPER SMASH!!", 0, 0);
-                ctx.restore();
-
-                if (cinematicTimer <= 0) {
-                    executeSuperSmash(cinematicPlayer, ball);
-                }
+                cinematicTimer--; ctx.fillStyle = "rgba(0, 0, 0, 0.7)"; ctx.fillRect(0, 0, 1400, 800);
+                ctx.save(); ctx.translate(cinematicPlayer.x + DISPLAY_W/2, cinematicPlayer.y + DISPLAY_H/2); for(let i=0; i<10; i++) { ctx.rotate(Math.random() * Math.PI * 2); ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.5})`; ctx.fillRect(50, -2, 800, 4); } ctx.restore();
+                ctx.save(); const scale = 1 + (60 - cinematicTimer) / 20; ctx.translate(700, 400); ctx.scale(scale, scale); ctx.font = "bold 80px 'Black Han Sans'"; ctx.fillStyle = "#00FFFF"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.shadowColor = "blue"; ctx.shadowBlur = 30; ctx.fillText("SUPER SMASH!!", 0, 0); ctx.strokeStyle = "white"; ctx.lineWidth = 4; ctx.strokeText("SUPER SMASH!!", 0, 0); ctx.restore();
+                if (cinematicTimer <= 0) { executeSuperSmash(cinematicPlayer, ball); }
             }
-
-            // ★ [카메라 적용 끝 - UI는 줌인 되지 않게 여기서 restore]
             ctx.restore();
 
-            if (gameState === 'countdown' && countdownText !== "") {
-                ctx.save();
-                ctx.shadowColor = "black"; ctx.shadowBlur = 20;
-                ctx.font = "bold 150px 'Black Han Sans', sans-serif";
-                ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                if(countdownText === "3") ctx.fillStyle = "#ff5e62";
-                else if(countdownText === "2") ctx.fillStyle = "orange";
-                else if(countdownText === "1") ctx.fillStyle = "#00d2ff";
-                else ctx.fillStyle = "#FFFF00"; 
-                ctx.fillText(countdownText, 700, 350);
-                ctx.lineWidth = 5; ctx.strokeStyle = "white"; ctx.strokeText(countdownText, 700, 350);
-                ctx.restore();
-            }
-
-            if (!isGameOver && (score.p1 === WIN_SCORE - 1 || score.p2 === WIN_SCORE - 1) && gameState === 'playing') {
-                ctx.save();
-                const scale = 1 + Math.sin(Date.now() / 200) * 0.1;
-                ctx.translate(700, 150); ctx.scale(scale, scale);
-                ctx.font = "bold 60px 'Black Han Sans', sans-serif";
-                ctx.textAlign = "center"; ctx.fillStyle = "#FF0000";
-                ctx.shadowColor = "yellow"; ctx.shadowBlur = 20;
-                ctx.fillText("🔥 MATCH POINT 🔥", 0, 0);
-                ctx.restore();
-            }
-
+            if (gameState === 'countdown' && countdownText !== "") { ctx.save(); ctx.shadowColor = "black"; ctx.shadowBlur = 20; ctx.font = "bold 150px 'Black Han Sans', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; if(countdownText === "3") ctx.fillStyle = "#ff5e62"; else if(countdownText === "2") ctx.fillStyle = "orange"; else if(countdownText === "1") ctx.fillStyle = "#00d2ff"; else ctx.fillStyle = "#FFFF00"; ctx.fillText(countdownText, 700, 350); ctx.lineWidth = 5; ctx.strokeStyle = "white"; ctx.strokeText(countdownText, 700, 350); ctx.restore(); }
+            if (!isGameOver && (score.p1 === WIN_SCORE - 1 || score.p2 === WIN_SCORE - 1) && gameState === 'playing') { ctx.save(); const scale = 1 + Math.sin(Date.now() / 200) * 0.1; ctx.translate(700, 150); ctx.scale(scale, scale); ctx.font = "bold 60px 'Black Han Sans', sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#FF0000"; ctx.shadowColor = "yellow"; ctx.shadowBlur = 20; ctx.fillText("🔥 MATCH POINT 🔥", 0, 0); ctx.restore(); }
             if (isGameOver) {
                 ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; ctx.fillRect(0, 0, 1400, 800);
-                ctx.save();
-                const blink = Math.floor(Date.now() / 200) % 2; 
-                ctx.fillStyle = blink === 0 ? "#FFD700" : "#FFFFFF"; 
-                ctx.font = "bold 100px 'Black Han Sans', sans-serif";
-                ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                ctx.shadowColor = "orange"; ctx.shadowBlur = 30;
-                ctx.fillText(`${winnerName} 승리! 🎉`, 700, 350);
-                ctx.shadowBlur = 0; ctx.fillStyle = "white";
-                ctx.font = "bold 30px 'Black Han Sans', sans-serif";
-                ctx.fillText("캐릭터 선택으로 돌아가려면 Enter", 700, 500);
-                ctx.restore();
+                ctx.save(); const blink = Math.floor(Date.now() / 200) % 2; ctx.fillStyle = blink === 0 ? "#FFD700" : "#FFFFFF"; ctx.font = "bold 100px 'Black Han Sans', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.shadowColor = "orange"; ctx.shadowBlur = 30; ctx.fillText(`${winnerName} 승리! 🎉`, 700, 350);
+                ctx.shadowBlur = 0; ctx.fillStyle = "white"; ctx.font = "bold 30px 'Black Han Sans', sans-serif"; ctx.fillText("캐릭터 선택으로 돌아가려면 Enter", 700, 500); ctx.restore();
             }
             requestAnimationFrame(loop);
         }
         
-        setTimeout(() => {
-            if(!gameStarted) {
-                console.warn("이미지 로딩 시간 초과 또는 실패. 게임을 강제로 시작합니다.");
-                gameStarted = true; initGame(); loop();
-            }
-        }, 3000);
-
+        setTimeout(() => { if(!gameStarted) { console.warn("이미지 로딩 시간 초과. 강제 시작."); gameStarted = true; initGame(); loop(); } }, 3000);
     </script>
 </body>
 </html>

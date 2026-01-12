@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>배카츄 배구</title>
+    <title>배카츄 배구 - 캐릭터 선택</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
 
@@ -166,8 +166,13 @@
             transform: scale(1.1); font-weight: bold;
         }
 
+        /* 버튼 그룹 및 가이드 버튼 스타일 */
+        .btn-group {
+            display: flex; gap: 20px; margin-top: 25px;
+        }
+
         .guide-btn {
-            margin-top: 20px; padding: 10px 30px; font-size: 1.5rem;
+            padding: 10px 30px; font-size: 1.5rem;
             background: linear-gradient(45deg, #ff00cc, #333399);
             border: 2px solid #fff; border-radius: 30px; color: white; cursor: none;
             box-shadow: 0 0 20px rgba(255, 0, 204, 0.6); transition: transform 0.2s;
@@ -180,6 +185,21 @@
             100% { box-shadow: 0 0 20px rgba(255, 0, 204, 0.6); }
         }
 
+        .skill-btn {
+            padding: 10px 30px; font-size: 1.5rem;
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            border: 2px solid #fff; border-radius: 30px; color: white; cursor: none;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.6); transition: transform 0.2s;
+            animation: pulseBtn2 2s infinite;
+        }
+        .skill-btn:hover { transform: scale(1.1); }
+        @keyframes pulseBtn2 {
+            0% { box-shadow: 0 0 20px rgba(255, 140, 0, 0.6); }
+            50% { box-shadow: 0 0 40px rgba(255, 140, 0, 1); }
+            100% { box-shadow: 0 0 20px rgba(255, 140, 0, 0.6); }
+        }
+
+        /* 모달 스타일 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
@@ -189,15 +209,22 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 3px solid #00d2ff; border-radius: 20px;
             padding: 30px; width: 1100px;
-            max-width: 95%;
+            max-width: 95%; max-height: 90vh; overflow-y: auto;
             box-shadow: 0 0 50px rgba(0, 210, 255, 0.5); text-align: center; position: relative;
         }
+        .skill-modal-content {
+            border-color: #FFD700;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+
         .modal-title {
             font-size: 3rem; 
             color: #fff; margin-bottom: 20px;
             text-shadow: 0 0 10px #00d2ff; border-bottom: 2px solid rgba(255,255,255,0.2);
             padding-bottom: 10px;
         }
+        .skill-title { color: #FFD700; text-shadow: 0 0 10px #FF4500; }
+
         .item-list { 
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: left; 
         }
@@ -224,6 +251,20 @@
             color: #ddd; 
             font-size: 1.1rem; 
         }
+
+        /* 스킬 그리드 스타일 */
+        .skill-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;
+        }
+        .skill-card {
+            background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 15px;
+            display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .skill-icon { font-size: 3rem; margin-right: 20px; width: 60px; text-align: center; }
+        .skill-info { display: flex; flex-direction: column; }
+        .skill-name { font-size: 1.5rem; font-weight: bold; color: #00d2ff; margin-bottom: 5px; }
+        .skill-desc { font-size: 1.1rem; color: #ddd; }
+
         .close-btn {
             position: absolute; top: 15px; right: 20px;
             font-size: 2.5rem; 
@@ -239,9 +280,9 @@
     
     <div class="cursor-dot" id="cursorDot"></div>
 
-    <div class="modal-overlay" id="itemModal" onclick="closeModal(event)">
+    <div class="modal-overlay" id="itemModal" onclick="closeModal(event, 'itemModal')">
         <div class="modal-content">
-            <div class="close-btn" onclick="toggleModal()">×</div>
+            <div class="close-btn" onclick="openModal('itemModal')">×</div>
             <div class="modal-title">✨ 아이템 도감 ✨</div>
             <div class="item-list">
                 <div class="item-column">
@@ -300,7 +341,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <div style="margin-top:20px; border-top:1px solid #555; padding-top:15px;">
                 <div style="font-size:1.5rem; color:#FFD700; margin-bottom:10px;">🔥 스매시 가이드 🔥</div>
                 <div style="text-align:left; font-size:1.1rem; color:#ddd; line-height:1.6; padding:0 20px;">
@@ -315,7 +356,61 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
+    <div class="modal-overlay" id="skillModal" onclick="closeModal(event, 'skillModal')">
+        <div class="modal-content skill-modal-content">
+            <div class="close-btn" onclick="openModal('skillModal')">×</div>
+            <div class="modal-title skill-title">⚡ 캐릭터 고유 스킬 (필살기) ⚡</div>
+            <div style="color: #bbb; margin-bottom: 25px; font-size: 1.3rem;">
+                게임 중 게이지 아래 <b style="color:#00FFFF">하늘색 바</b>가 가득 차면 사용 가능! (쿨타임 10초)<br>
+                <span style="color:#00d2ff">P1: Shift 키</span> / <span style="color:#ff5e62">P2: Enter 키</span>
+            </div>
+            <div class="skill-grid">
+                <div class="skill-card">
+                    <div class="skill-icon">😫</div>
+                    <div class="skill-info">
+                        <span class="skill-name">다온: 잼민이의 떼쓰기</span>
+                        <span class="skill-desc">상대방이 너무 시끄러워서 <b>점프를 못하게</b> 만듭니다. (중력 증가)</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">👶</div>
+                    <div class="skill-info">
+                        <span class="skill-name">유주: 난쟁이의 저주</span>
+                        <span class="skill-desc">주문을 외워서 <b>상대방을 아주 작게(난쟁이)</b> 만들어버립니다.</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🤱</div>
+                    <div class="skill-info">
+                        <span class="skill-name">엄마: 공포의 분신술</span>
+                        <span class="skill-desc">공 주변에 <b>가짜 공들이 튀어나와</b> 시야를 방해하고 혼란을 줍니다.</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">💳</div>
+                    <div class="skill-info">
+                        <span class="skill-name">아빠: 법인카드 긁기</span>
+                        <span class="skill-desc">결제 내역처럼 <b>공을 투명하게(유령공)</b> 만듭니다.</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🍛</div>
+                    <div class="skill-info">
+                        <span class="skill-name">돈까스할매: 무한 리필</span>
+                        <span class="skill-desc">배 터지게 먹으라고 <b>공을 엄청나게 크게</b> 만듭니다.</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🐴</div>
+                    <div class="skill-info">
+                        <span class="skill-name">근육할배: 나 때는 말이야</span>
+                        <span class="skill-desc">옛날 이야기를 시작해서 <b>게임 속도를 느리게(슬로우)</b> 만듭니다.</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -342,7 +437,10 @@
             </div>
         </div>
 
-        <button class="guide-btn" onclick="toggleModal()">📜 아이템 도감 보기</button>
+        <div class="btn-group">
+            <button class="guide-btn" onclick="openModal('itemModal')">📜 아이템 도감</button>
+            <button class="skill-btn" onclick="openModal('skillModal')">⚡ 스킬 가이드</button>
+        </div>
 
         <div class="footer">랜덤 선택을 하려면 '?' 카드를 누르세요! (50% 확률로 히든 캐릭터 등장)</div>
     </div>
@@ -463,7 +561,6 @@
                 statusMsg.innerHTML = "내 캐릭터 (P1)를 선택하세요 (AI 대전)";
                 statusMsg.style.borderColor = "#00FF00"; statusMsg.style.color = "#00FF00";
             }
-            // 리셋 로직 필요 시 추가 (선택 초기화 등)
             resetSelection();
         }
 
@@ -475,14 +572,15 @@
             document.querySelectorAll('.badge').forEach(b => b.style.display = 'none');
         }
 
-        function toggleModal() {
-            const modal = document.getElementById('itemModal');
+        // --- [수정된 모달 로직] ---
+        function openModal(id) {
+            const modal = document.getElementById(id);
             modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        function closeModal(e) {
-            if (e.target.id === 'itemModal') {
-                document.getElementById('itemModal').style.display = 'none';
+        function closeModal(e, id) {
+            if (e.target.id === id) {
+                document.getElementById(id).style.display = 'none';
             }
         }
 
