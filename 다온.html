@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>다온 vs 유주: 파이널 에디션 (불꽃 슛 강화판)</title>
+    <title>다온 vs 유주: 저스트 가드 & 다이나믹 카메라</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
 
@@ -30,6 +30,38 @@
             text-align: center; pointer-events: none;
             text-shadow: 3px 3px 0 #000;
         }
+
+        /* ▼▼▼ [추가된 버튼 스타일] ▼▼▼ */
+        .home-btn {
+            position: absolute;
+            top: 10px; 
+            left: 30px;
+            padding: 10px 25px;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1.5rem;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px; /* 둥근 캡슐 모양 */
+            cursor: pointer;
+            z-index: 100;
+            pointer-events: auto; /* 부모의 none 속성 무시하고 클릭 가능 */
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .home-btn:hover {
+            background-color: #ff5e62; /* 호버 시 네온 핑크/레드 계열 */
+            border-color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #ff5e62;
+        }
+
+        .home-btn:active {
+            transform: scale(0.95);
+        }
+        /* ▲▲▲ [추가된 버튼 스타일 끝] ▲▲▲ */
 
         .score-box {
             font-size: 4rem; color: #fff;
@@ -104,6 +136,9 @@
 
     <div class="game-container">
         <div class="ui-layer">
+            <button class="home-btn" onclick="location.href='index.html'">
+                🏠 메인으로
+            </button>
             <div class="score-box">
                 <span class="score-p1" id="scoreP1">0</span> : <span class="score-p2" id="scoreP2">0</span>
             </div>
@@ -123,7 +158,7 @@
             <span id="p2-control-text">자동 플레이 중... 🤖</span>
         </div>
         <div class="smash-row">
-            ★ 게이지 MAX + 점프 스매시 = ⛔ 필살기 발동! ⛔ ★
+            ★ S(↓)키로 타이밍 맞춰 방어하면 '저스트 가드' 발동! ★
         </div>
     </div>
 
@@ -143,11 +178,7 @@
                 keys[p2.controls.down] = false;
 
                 if (gameState !== 'playing' || cinematicTimer > 0) return;
-
-                // 공이 상승 모드(불꽃슛 준비)일 때는 제자리에서 대기 (당황하는 느낌)
-                if (ball.isRising || ball.isHolding) {
-                    return;
-                }
+                if (ball.isRising || ball.isHolding) return;
 
                 const ballInMySide = ball.x > 700; 
                 const ballComing = ball.vx > 0; 
@@ -195,11 +226,50 @@
                         keys[p2.controls.down] = true; 
                     }
                 }
+                // 저스트 가드 AI (공이 빠르고 가까울 때)
+                if (ballInMySide && (ball.isSuperSmash || ball.isFireShot) && distX < 60 && ballHeight > p2.y - 50) {
+                     keys[p2.controls.down] = true; 
+                }
             }
         }
         // ------------------------------------
 
-        // 1. CLASS DEFINITIONS
+        // ★ [1. 다이나믹 카메라 객체]
+        const camera = {
+            x: 0,
+            y: 0,
+            zoom: 1,
+            update: function(ball) {
+                let targetZ = 1.0;
+                let targetX = 0;
+                let targetY = 0;
+
+                // 액션 상황(스매시, 불꽃슛, 필살기 시전 등)에서 줌인
+                if (ball.isSuperSmash || ball.isFireShot || ball.isRising || ball.isHolding) {
+                    targetZ = 1.15; // 1.15배 줌인
+                    // 카메라는 공을 약간 따라감 (제한적)
+                    targetX = (700 - ball.x) * 0.2; 
+                    targetY = (400 - ball.y) * 0.2;
+                } else {
+                    targetZ = 1.0;
+                    targetX = 0;
+                    targetY = 0;
+                }
+
+                // 부드러운 전환 (Linear Interpolation)
+                this.zoom += (targetZ - this.zoom) * 0.05;
+                this.x += (targetX - this.x) * 0.05;
+                this.y += (targetY - this.y) * 0.05;
+            },
+            apply: function(ctx) {
+                // 화면 중심 기준으로 줌인
+                ctx.translate(700, 400);
+                ctx.scale(this.zoom, this.zoom);
+                ctx.translate(-700 + this.x, -400 + this.y);
+            }
+        };
+
+        // CLASS DEFINITIONS
         class Reaction {
             constructor(x, y, emoji) {
                 this.x = x; this.y = y; this.emoji = emoji;
@@ -314,23 +384,42 @@
                 this.vx = 0; this.vy = 0;
                 this.radius = BALL_R; this.color = color;
                 this.active = true;
+                this.trail = [];
             }
             update() {
                 if (!this.active) return;
                 this.vy += GRAVITY; this.x += this.vx; this.y += this.vy;
+                
+                this.trail.push({x: this.x, y: this.y, r: this.radius * 0.8});
+                if(this.trail.length > 10) this.trail.shift();
+
                 if (this.x < this.radius || this.x > 1400 - this.radius) this.vx *= -0.8;
                 if (this.y > GROUND_Y - this.radius) {
                     this.active = false; createExplosion(this.x, this.y, this.color); 
                 }
+                if(Math.random() < 0.3) particles.push(new Particle(this.x, this.y, "#FF4500", true));
             }
             draw() {
                 if (!this.active) return;
+                
+                if (this.trail.length > 1) {
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'lighter';
+                    ctx.beginPath();
+                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                    for(let t of this.trail) ctx.lineTo(t.x, t.y);
+                    ctx.strokeStyle = "rgba(255, 69, 0, 0.5)";
+                    ctx.lineWidth = 15;
+                    ctx.lineCap = 'round';
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
                 ctx.fillStyle = this.color; ctx.globalAlpha = 0.8; ctx.fill(); 
                 ctx.lineWidth = 4; ctx.strokeStyle = "#333"; ctx.stroke();
                 
-                // 불꽃 효과
-                ctx.shadowBlur = 10; ctx.shadowColor = "red";
+                ctx.shadowBlur = 20; ctx.shadowColor = "red";
                 ctx.beginPath(); ctx.arc(this.x - 10, this.y - 10, 8, 0, Math.PI*2);
                 ctx.fillStyle = "rgba(255,255,255,0.6)"; ctx.fill(); 
                 ctx.shadowBlur = 0;
@@ -346,25 +435,24 @@
                 this.active = true;
                 
                 const rand = Math.random();
-                // 히든 아이템 'FIRE' 확률
-                if (rand < 0.05) this.type = 'FIRE'; 
-                else if (rand < 0.10) this.type = 'BANANA'; 
-                else if (rand < 0.16) this.type = 'POOP'; 
-                else if (rand < 0.22) this.type = 'ICE';  
+                if (rand < 0.08) this.type = 'FIRE'; 
+                else if (rand < 0.13) this.type = 'BANANA'; 
+                else if (rand < 0.18) this.type = 'POOP'; 
+                else if (rand < 0.23) this.type = 'ICE';  
                 else if (rand < 0.28) this.type = 'CONFUSION'; 
-                else if (rand < 0.34) this.type = 'GIANT'; 
-                else if (rand < 0.40) this.type = 'DWARF'; 
-                else if (rand < 0.46) this.type = 'SPEED'; 
-                else if (rand < 0.52) this.type = 'JUMP'; 
-                else if (rand < 0.58) this.type = 'BIG'; 
-                else if (rand < 0.64) this.type = 'BONUS';
-                else if (rand < 0.70) this.type = 'BOMB';     
-                else if (rand < 0.76) this.type = 'BLACKOUT'; 
-                else if (rand < 0.82) this.type = 'TYPHOON';  
-                else if (rand < 0.88) this.type = 'GHOST';
-                else if (rand < 0.92) this.type = 'INK'; 
-                else if (rand < 0.96) this.type = 'CLONE';
-                else if (rand < 0.98) this.type = 'WALL';
+                else if (rand < 0.33) this.type = 'GIANT'; 
+                else if (rand < 0.38) this.type = 'DWARF'; 
+                else if (rand < 0.43) this.type = 'SPEED'; 
+                else if (rand < 0.48) this.type = 'JUMP'; 
+                else if (rand < 0.53) this.type = 'BIG'; 
+                else if (rand < 0.58) this.type = 'BONUS';
+                else if (rand < 0.63) this.type = 'BOMB';     
+                else if (rand < 0.68) this.type = 'BLACKOUT'; 
+                else if (rand < 0.73) this.type = 'TYPHOON';  
+                else if (rand < 0.78) this.type = 'GHOST';
+                else if (rand < 0.83) this.type = 'INK'; 
+                else if (rand < 0.88) this.type = 'CLONE';
+                else if (rand < 0.93) this.type = 'WALL';
                 else this.type = 'CHICKEN';
             }
             
@@ -402,12 +490,18 @@
         }
 
         class Particle {
-            constructor(x, y, color) {
+            constructor(x, y, color, isSmoke = false) {
                 this.x = x; this.y = y;
                 this.vx = (Math.random() - 0.5) * 15; 
                 this.vy = (Math.random() - 0.5) * 15;
                 this.life = 1.0; this.color = color; 
+                this.isSmoke = isSmoke;
                 this.size = Math.random() * 10 + 5; 
+                if (isSmoke) {
+                    this.vx *= 0.5; this.vy = -Math.random() * 3 - 1; // 연기는 위로
+                    this.size *= 1.5;
+                    this.life = 0.8;
+                }
             }
             update() { 
                 this.x += this.vx; this.y += this.vy; 
@@ -416,7 +510,7 @@
             }
             draw() { 
                 ctx.save();
-                ctx.globalCompositeOperation = 'lighter'; 
+                ctx.globalCompositeOperation = this.isSmoke ? 'source-over' : 'lighter'; 
                 ctx.globalAlpha = this.life; 
                 ctx.fillStyle = this.color; 
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); 
@@ -425,8 +519,8 @@
         }
 
         class Shockwave {
-            constructor(x, y, color) { this.x = x; this.y = y; this.radius = 20; this.alpha = 1.0; this.lineWidth = 10; this.color = color; }
-            update() { this.radius += 15; this.alpha -= 0.05; this.lineWidth *= 0.9; }
+            constructor(x, y, color) { this.x = x; this.y = y; this.radius = 20; this.alpha = 1.0; this.lineWidth = 15; this.color = color; }
+            update() { this.radius += 20; this.alpha -= 0.05; this.lineWidth *= 0.9; }
             draw() { if (this.alpha <= 0) return; ctx.save(); ctx.globalAlpha = this.alpha; ctx.strokeStyle = this.color; ctx.lineWidth = this.lineWidth; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
         }
 
@@ -719,7 +813,6 @@
             }
         }
 
-        // ★ [강화된 Ball 클래스]
         class Ball {
             constructor() { 
                 this.defaultColor = '#ffeb3b';
@@ -730,11 +823,10 @@
                 this.smashDuration = 0;
                 this.trail = []; 
                 
-                // 불꽃 슛 관련 상태
-                this.isRising = false;  // 위로 올라가는 중
-                this.isHolding = false; // 공중에서 기 모으는 중
+                this.isRising = false;  
+                this.isHolding = false; 
                 this.holdingTimer = 0; 
-                this.fireShooter = null; // 누가 쐈는지
+                this.fireShooter = null; 
 
                 this.reset('left'); 
             }
@@ -757,49 +849,55 @@
                 if (gameState !== 'playing') return;
                 if (cinematicTimer > 0) return; 
 
-                // ★ [1] 불꽃 슛 상승 단계
                 if (this.isRising) {
-                    const targetY = 50; // 화면 최상단 부근
+                    const targetY = 50; 
                     const speed = 25 * GAME_SPEED_RATIO;
-                    this.x = this.x; // X축 고정
                     this.y = Math.max(targetY, this.y - speed);
                     
-                    // 궤적 효과
                     this.trail.push({x: this.x, y: this.y, r: Math.random() * 10 + 20}); 
                     if (this.trail.length > 25) this.trail.shift(); 
+                    
+                    if (Math.random() < 0.5) particles.push(new Particle(this.x, this.y, "rgba(255,100,0,0.5)"));
 
                     if (this.y <= targetY) {
                         this.isRising = false;
                         this.isHolding = true;
-                        this.holdingTimer = 40; // 약 0.7초 대기
+                        this.holdingTimer = 40; 
                         showItemNotice("🔥 차지 중...! 🔥");
                     }
-                    return; // 물리 무시
+                    return; 
                 }
 
-                // ★ [2] 불꽃 슛 대기(차징) 단계
                 if (this.isHolding) {
                     this.holdingTimer--;
-                    // 부들부들 떨림 효과
                     this.x += (Math.random() - 0.5) * 5;
                     this.y += (Math.random() - 0.5) * 5;
                     
-                    // 기 모으는 파티클
-                    for(let i=0; i<2; i++) {
-                        particles.push(new Particle(this.x, this.y, "#FF4500"));
+                    for(let i=0; i<3; i++) {
+                        let angle = Math.random() * Math.PI * 2;
+                        let dist = 50 + Math.random() * 20;
+                        let px = this.x + Math.cos(angle) * dist;
+                        let py = this.y + Math.sin(angle) * dist;
+                        let p = new Particle(px, py, "#FFD700");
+                        p.vx = (this.x - px) * 0.1;
+                        p.vy = (this.y - py) * 0.1;
+                        particles.push(p);
                     }
 
                     if (this.holdingTimer <= 0) {
                         this.isHolding = false;
-                        fireScatterShot(this); // 발사!
+                        fireScatterShot(this); 
                     }
-                    return; // 물리 무시
+                    return; 
                 }
 
-                // --- 기존 물리 로직 ---
-
-                // 궤적 생성 로직 강화
-                if (this.isSuperSmash || this.isFireShot || Math.abs(this.vx) > 12 || Math.abs(this.vy) > 12) {
+                if (this.isFireShot) {
+                    this.trail.push({x: this.x, y: this.y, r: this.radius * 1.2}); 
+                    if (this.trail.length > 30) this.trail.shift(); 
+                    particles.push(new Particle(this.x, this.y, Math.random() < 0.5 ? "#FF4500" : "#FFFF00"));
+                    if(Math.random() < 0.3) particles.push(new Particle(this.x, this.y, "#333333", true)); 
+                } 
+                else if (this.isSuperSmash || Math.abs(this.vx) > 12 || Math.abs(this.vy) > 12) {
                     this.trail.push({x: this.x, y: this.y, r: Math.random() * 10 + 20}); 
                     if (this.trail.length > 25) this.trail.shift(); 
                 } else {
@@ -809,41 +907,24 @@
                 if (this.isSuperSmash) {
                     this.smashTimer++;
                     let t = this.smashTimer / this.smashDuration; 
-
-                    if (t >= 1) {
-                        t = 1;
-                        this.isSuperSmash = false; 
-                    }
-
+                    if (t >= 1) { t = 1; this.isSuperSmash = false; }
                     let u = 1 - t;
                     this.x = (u * u * this.smashStart.x) + (2 * u * t * this.smashControl.x) + (t * t * this.smashEnd.x);
                     this.y = (u * u * this.smashStart.y) + (2 * u * t * this.smashControl.y) + (t * t * this.smashEnd.y);
-
-                    for(let i=0; i<3; i++) {
-                        let pColor = Math.random() < 0.5 ? "#FFFF00" : "#FF4500"; 
-                        let px = this.x + (Math.random()-0.5) * 40;
-                        let py = this.y + (Math.random()-0.5) * 40;
-                        particles.push(new Particle(px, py, pColor));
-                    }
+                    for(let i=0; i<3; i++) particles.push(new Particle(this.x + (Math.random()-0.5)*40, this.y + (Math.random()-0.5)*40, "#FFFF00"));
                 } else {
                     const currentGravity = GRAVITY * this.mass; 
                     this.vy += currentGravity; this.vx *= 0.99; 
-                    
-                    if (typhoonTimer > 0) {
-                        this.vx += windDirection * 0.15; 
-                    }
-
+                    if (typhoonTimer > 0) this.vx += windDirection * 0.15; 
                     this.x += this.vx; this.y += this.vy;
                 }
 
                 if (!this.isSuperSmash) {
                     if (this.x < this.radius) { this.x = this.radius; this.vx *= -0.9; createExplosion(this.x, this.y, "white"); }
                     else if (this.x > 1400 - this.radius) { this.x = 1400 - this.radius; this.vx *= -0.9; createExplosion(this.x, this.y, "white"); }
-                    
                     const currentNetHeight = (wallTimer > 0) ? 400 : 200; 
                     if (Math.abs(this.x - 700) < this.radius + 10 && this.y > (GROUND_Y - currentNetHeight)) {
-                         this.vx *= -1;
-                         netBendVel = this.vx * 1.5; 
+                         this.vx *= -1; netBendVel = this.vx * 1.5; 
                     }
                 }
 
@@ -851,47 +932,29 @@
                 
                 if (this.y > 800 - this.radius - 50) {
                     if (this.x < 700) {
-                        let points = 1;
-                        if (p2.chickenTimer > 0) points = 2; 
+                        let points = 1; if (p2.chickenTimer > 0) points = 2; 
                         score.p2 += points;
-                        
-                        const scoreEl = document.getElementById('scoreP2');
-                        scoreEl.style.transform = "scale(1.5)";
-                        scoreEl.style.color = "#ffff00";
-                        setTimeout(() => { scoreEl.style.transform = "scale(1)"; scoreEl.style.color = "#ff5e62"; }, 200);
-
-                        if (p2.chickenTimer > 0) showItemNotice("🐔 꼬꼬댁 찬스! +2점! 🐔");
-                        
                         reactions.push(new Reaction(p2.x + DISPLAY_W/2, p2.y, "🤣")); 
                         reactions.push(new Reaction(p1.x + DISPLAY_W/2, p1.y, "😭")); 
                     } else { 
-                        let points = 1;
-                        if (p1.chickenTimer > 0) points = 2; 
+                        let points = 1; if (p1.chickenTimer > 0) points = 2; 
                         score.p1 += points;
-
-                        const scoreEl = document.getElementById('scoreP1');
-                        scoreEl.style.transform = "scale(1.5)";
-                        scoreEl.style.color = "#ffff00";
-                        setTimeout(() => { scoreEl.style.transform = "scale(1)"; scoreEl.style.color = "#00d2ff"; }, 200);
-
-                        if (p1.chickenTimer > 0) showItemNotice("🐔 꼬꼬댁 찬스! +2점! 🐔");
-
                         reactions.push(new Reaction(p1.x + DISPLAY_W/2, p1.y, "🤣"));
                         reactions.push(new Reaction(p2.x + DISPLAY_W/2, p2.y, "😭"));
                     }
                     scoreP1.innerText = score.p1; scoreP2.innerText = score.p2;
                     
                     const maxScore = Math.max(score.p1, score.p2);
-                    if ((maxScore === 5 && lastMaxScore < 5) || (maxScore === 10 && lastMaxScore < 10) || (maxScore === 15 && lastMaxScore < 15)) {
+                    if ((maxScore === 5 && lastMaxScore < 5) || (maxScore === 10 && lastMaxScore < 10)) {
                         showItemNotice(`🌟 ${maxScore}점 돌파! 배경 변경! 🌟`);
                         let newBgIndex; do { newBgIndex = Math.floor(Math.random() * BG_CONFIG.length); } while (newBgIndex === currentBgIndex);
                         updateBackground(newBgIndex);
                     }
                     lastMaxScore = maxScore;
 
-                    if (this.isSuperSmash) {
-                        shakeDuration = 20; 
-                        for(let i=0; i<30; i++) particles.push(new Particle(this.x, this.y, "#FF0000"));
+                    if (this.isSuperSmash || this.isFireShot) {
+                        shakeDuration = 30; 
+                        for(let i=0; i<40; i++) particles.push(new Particle(this.x, this.y, "#FF0000"));
                         charEffects.push(new Shockwave(this.x, this.y, "#FFD700")); 
                     }
 
@@ -912,50 +975,51 @@
             }
 
             draw() {
-                // 화려한 궤적 그리기 (3중 레이어)
                 if (this.trail.length > 1) {
                     ctx.save();
                     
-                    if (this.isSuperSmash || this.isFireShot || this.isRising) {
+                    if (this.isFireShot) {
                         ctx.globalCompositeOperation = 'lighter';
-                    }
-
-                    // 1. 외곽선
-                    ctx.beginPath();
-                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
-                    for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
-                    
-                    if (this.isSuperSmash || this.isRising) {
+                        ctx.lineCap = 'round';
+                        for (let i = 0; i < this.trail.length - 1; i++) {
+                            const point = this.trail[i];
+                            const nextPoint = this.trail[i+1];
+                            const ratio = i / this.trail.length;
+                            ctx.beginPath();
+                            ctx.moveTo(point.x, point.y);
+                            ctx.lineTo(nextPoint.x, nextPoint.y);
+                            ctx.lineWidth = this.radius * 2 * (ratio + 0.2);
+                            if (ratio > 0.8) ctx.strokeStyle = "#FFFFFF"; 
+                            else if (ratio > 0.6) ctx.strokeStyle = "#FFFF00";
+                            else if (ratio > 0.3) ctx.strokeStyle = "#FF4500";
+                            else ctx.strokeStyle = "rgba(255, 0, 0, 0.5)"; 
+                            ctx.shadowBlur = 20 * ratio;
+                            ctx.shadowColor = "orange";
+                            ctx.stroke();
+                        }
+                    } else if (this.isSuperSmash || this.isRising) {
+                        ctx.globalCompositeOperation = 'lighter';
+                        ctx.beginPath();
+                        ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                        for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                        
                         ctx.strokeStyle = "rgba(255, 0, 0, 0.4)";
                         ctx.lineWidth = this.radius * 2.5; 
                         ctx.lineCap = 'round'; ctx.lineJoin = 'round';
                         ctx.shadowBlur = 30; ctx.shadowColor = "red";
                         ctx.stroke();
 
-                        // 2. 중간선
                         ctx.beginPath();
                         ctx.moveTo(this.trail[0].x, this.trail[0].y);
                         for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
                         ctx.strokeStyle = "rgba(255, 165, 0, 0.7)";
                         ctx.lineWidth = this.radius * 1.5;
-                        ctx.shadowBlur = 15; ctx.shadowColor = "orange";
                         ctx.stroke();
 
-                        // 3. 중심선
+                    } else {
                         ctx.beginPath();
                         ctx.moveTo(this.trail[0].x, this.trail[0].y);
                         for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
-                        ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-                        ctx.lineWidth = this.radius * 0.5;
-                        ctx.shadowBlur = 5; ctx.shadowColor = "white";
-                        ctx.stroke();
-
-                    } else if (this.isFireShot) {
-                        ctx.strokeStyle = "rgba(255, 69, 0, 0.5)";
-                        ctx.shadowBlur = 10; ctx.shadowColor = "red";
-                        ctx.lineWidth = this.radius;
-                        ctx.stroke();
-                    } else {
                         ctx.strokeStyle = "rgba(255, 255, 0, 0.3)";
                         ctx.lineWidth = this.radius;
                         ctx.stroke();
@@ -969,7 +1033,6 @@
                     ctx.ellipse(this.x, GROUND_Y - 10, shadowSize, shadowSize * 0.3, 0, 0, Math.PI*2); ctx.fill();
                 }
                 
-                // 공 그리기
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
                 
                 if (ghostBallTimer > 0) {
@@ -978,17 +1041,21 @@
                     ctx.globalAlpha = 1.0;
                 }
 
-                const isHiddenPresent = ["돈까스할매", "근육할배"].includes(p1.name) || ["돈까스할매", "근육할배"].includes(p2.name);
-                if (this.isSuperSmash || this.isRising || this.isHolding) { 
+                if (this.isFireShot) {
+                    const pulse = Math.sin(Date.now() / 50) * 5; 
+                    ctx.fillStyle = "#FFDD00"; 
+                    ctx.shadowBlur = 40 + pulse; 
+                    ctx.shadowColor = "#FF0000"; 
+                }
+                else if (this.isSuperSmash || this.isRising || this.isHolding) { 
                     ctx.fillStyle = "#FFFFFF"; 
                     ctx.shadowBlur = 50; ctx.shadowColor = "#FF4500"; 
                 }
-                else if (this.isFireShot) { ctx.fillStyle = "#FF0000"; ctx.shadowBlur = 20; ctx.shadowColor = "orange"; } 
                 else if (this.mushroomCount > 0) { ctx.fillStyle = this.color; ctx.shadowBlur = 0; } 
-                else if (isHiddenPresent) { const hue = (Date.now() / 2) % 360; ctx.fillStyle = `hsl(${hue}, 100%, 50%)`; ctx.shadowBlur = 0; } 
                 else { ctx.fillStyle = this.defaultColor; ctx.shadowBlur = 0; }
 
                 ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = "#333"; ctx.stroke(); 
+                
                 ctx.beginPath(); ctx.arc(this.x - 10, this.y - 10, 8, 0, Math.PI*2);
                 ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.fill(); ctx.shadowBlur = 0; 
                 
@@ -1007,18 +1074,7 @@
         const BG_CONFIG = [
             { src: 'BG.jpg', ballColor: '#FF0055' }, { src: 'BG1.jpg', ballColor: '#FFFF00' },  
             { src: 'BG2.jpg', ballColor: '#00FF00' }, { src: 'BG3.jpg', ballColor: '#FFFFFF' },  
-            { src: 'BG4.jpg', ballColor: '#800080' }, { src: 'BG5.jpg', ballColor: '#00FFFF' },  
-            { src: 'BG6.jpg', ballColor: '#00FF00' }, { src: 'BG7.jpg', ballColor: '#0000FF' },  
-            { src: 'BG8.jpg', ballColor: '#FFFF00' }, { src: 'BG9.jpg', ballColor: '#FF0055' },  
-            { src: 'BG10.jpg', ballColor: '#00FFFF' },
-            { src: 'BG11.jpg', ballColor: '#00FF00' }, { src: 'BG12.jpg', ballColor: '#00FFFF' },
-            { src: 'BG13.jpg', ballColor: '#FFFF00' }, { src: 'BG14.jpg', ballColor: '#FF0055' },
-            { src: 'BG15.jpg', ballColor: '#FFFFFF' }, { src: 'BG16.jpg', ballColor: '#800080' },
-            { src: 'BG17.jpg', ballColor: '#0000FF' }, { src: 'BG18.jpg', ballColor: '#00FF00' },
-            { src: 'BG19.jpg', ballColor: '#00FFFF' }, { src: 'BG20.jpg', ballColor: '#FFFF00' },
-            { src: 'BG21.jpg', ballColor: '#FF0055' }, { src: 'BG22.jpg', ballColor: '#FFFFFF' },
-            { src: 'BG23.jpg', ballColor: '#800080' }, { src: 'BG24.jpg', ballColor: '#0000FF' },
-            { src: 'BG25.jpg', ballColor: '#00FF00' }, { src: 'BG26.jpg', ballColor: '#00FFFF' }
+            { src: 'BG4.jpg', ballColor: '#800080' }, { src: 'BG5.jpg', ballColor: '#00FFFF' }
         ];
 
         let currentBgIndex = Math.floor(Math.random() * BG_CONFIG.length);
@@ -1062,6 +1118,9 @@
         bgMusic.loop = true; bgMusic.volume = 0.4;
         const hitSound = new Audio('song/heavy_punch1.mp3'); 
         hitSound.volume = 0.8;
+        // ★ [저스트 가드 사운드 추가]
+        const strikingSound = new Audio('song/striking.mp3');
+        strikingSound.volume = 0.9;
 
         const jumpSound = new Audio('song/jump.mp3');
         const giantSound = new Audio('song/power.mp3');   
@@ -1197,6 +1256,8 @@
 
         window.onkeydown = (e) => {
             keys[e.code] = true;
+            
+            // ▼▼▼ 경로 수정 (game_select.html -> index.html) ▼▼▼
             if (isGameOver && e.code === 'Enter') window.location.href = 'index.html';
 
             if (!isGameOver && gameState === 'playing') {
@@ -1269,59 +1330,50 @@
         function showItemNotice(text) { itemNotice.innerText = text; itemNotice.style.opacity = 1; setTimeout(() => { itemNotice.style.opacity = 0; }, 2000); }
 
         function triggerFireShotSequence(player, ball) {
-            // 이미 슛 모드면 무시
             if (ball.isRising || ball.isHolding) return;
 
             ball.fireShooter = player;
-            ball.isRising = true; // 상승 시작
-            ball.isSuperSmash = false; // 기본 스매시 로직 해제
-            ball.vx = 0; // 수평 이동 정지
-            ball.vy = -20; // 초기 상승 속도
+            ball.isRising = true; 
+            ball.isSuperSmash = false; 
+            ball.vx = 0; 
+            ball.vy = -20; 
 
             showItemNotice("🔥 필살기 발동! 🔥");
             createExplosion(player.x, player.y, "#FF0000");
         }
 
-        // 5갈래 확산 슛 함수
         function fireScatterShot(ball) {
             const player = ball.fireShooter;
             if (!player) return;
 
-            showItemNotice("☄️ 메테오 스톰! ☄️");
-            shakeDuration = 40; // 화면 흔들림
+            showItemNotice("☄️ METEOR STORM! ☄️");
+            shakeDuration = 60; 
 
-            // 상대 진영 범위
+            charEffects.push(new Shockwave(ball.x, ball.y, "#FF0000"));
+            charEffects.push(new Shockwave(ball.x, ball.y, "#FFFF00"));
+
             const startX = player.side === 'left' ? 700 : 700;
             const endX = player.side === 'left' ? 1400 : 0;
             const courtWidth = Math.abs(endX - startX);
             const gap = courtWidth / 6;
-
-            const realBallIndex = 2; // 중앙(2번)을 진짜 공으로
+            const realBallIndex = 2; 
 
             for(let i = 0; i < 5; i++) {
-                // 목표 X 좌표
                 let targetX;
-                if (player.side === 'left') {
-                    targetX = 700 + (gap * (i + 1)); 
-                } else {
-                    targetX = 700 - (gap * (i + 1));
-                }
+                if (player.side === 'left') { targetX = 700 + (gap * (i + 1)); } 
+                else { targetX = 700 - (gap * (i + 1)); }
 
-                // 목표까지 도달 시간 (프레임)
                 const timeToHit = 30; 
-                // 등가속도 운동 역산 (도착 지점 Y는 750)
                 const targetY = 750;
                 
                 const vx = (targetX - ball.x) / timeToHit;
                 const vy = (targetY - ball.y) / timeToHit - (0.5 * (GRAVITY * ball.mass) * timeToHit);
 
                 if (i === realBallIndex) {
-                    // 진짜 공 물리 적용
                     ball.vx = vx * GAME_SPEED_RATIO;
                     ball.vy = vy * GAME_SPEED_RATIO;
-                    ball.isFireShot = true;
+                    ball.isFireShot = true; 
                 } else {
-                    // 가짜 공 생성
                     let fb = new FakeBall(ball.x, ball.y, "#FF4500");
                     fb.vx = vx * GAME_SPEED_RATIO;
                     fb.vy = vy * GAME_SPEED_RATIO;
@@ -1352,16 +1404,33 @@
             let dist = Math.sqrt(dx*dx + dy*dy);
             
             if (dist < DISPLAY_W/2 + b.radius) { 
-                if (b.isSuperSmash) {
+                
+                // ★ [2. 저스트 가드 시스템]
+                // 상대방의 강력한 공격(슈퍼스매시, 불꽃슛)이 들어올 때
+                if (b.isSuperSmash || b.isFireShot || (Math.abs(b.vx) > 15)) {
+                    // 키를 누르고 있는 상태에서 충돌하면 '저스트 가드' 판정
                     if (keys[p.controls.down]) {
                         b.isSuperSmash = false;
-                        b.vy = -15; 
-                        b.vx = p.side === 'left' ? 5 : -5;
-                        createExplosion(b.x, b.y, "white");
-                        showItemNotice("🛡️ PERFECT DEFENSE! 🛡️");
-                        hitSound.currentTime = 0; hitSound.play().catch(()=>{});
-                        return;
+                        b.isFireShot = false;
+                        
+                        // 공 반사 (Reflect)
+                        b.vx = p.side === 'left' ? 25 : -25;
+                        b.vy = -15;
+
+                        // 이펙트 및 사운드
+                        createExplosion(b.x, b.y, "#00FFFF"); // 청색 폭발
+                        charEffects.push(new Shockwave(b.x, b.y, "#00FFFF"));
+                        strikingSound.currentTime = 0; strikingSound.play().catch(()=>{});
+                        
+                        hitStopTimer = 10; // 임팩트 정지
+                        shakeDuration = 10;
+                        
+                        // 게이지 보너스
+                        p.gauge = Math.min(p.gauge + 30, p.maxGauge);
+                        showItemNotice("🛡️ JUST GUARD! 🛡️");
+                        return; // 일반 피격 로직 무시
                     } else {
+                        // 방어 실패 시 (기존 로직)
                         p.stunTimer = 60; 
                         p.isSmashHit = true; 
                         p.vx = p.side === 'left' ? -20 : 20; 
@@ -1395,10 +1464,9 @@
                 if (p.name === "돈까스할매") { for(let i=0; i<8; i++) particles.push(new Particle(b.x, b.y, "#FF4500")); createExplosion(b.x, b.y, "#FFD700"); }
                 
                 if (keys[p.controls.down]) { 
-                    // ★ [수정] 불꽃 아이템 소지 시, 일반 스매시 키(↓)로도 필살기 시퀀스 발동
                     if (p.fireMultiBallTimer > 0) {
                          triggerFireShotSequence(p, b);
-                         return; // 이후 일반 로직 실행 안 함
+                         return;
                     }
 
                     hitStopTimer = 6; 
@@ -1424,7 +1492,6 @@
         }
 
         function executeSuperSmash(player, ballObj) {
-            // ★ [수정] 슈퍼 스매시 발동 시에도 불꽃 아이템이 있으면 필살기 시퀀스로 전환
             if (player.fireMultiBallTimer > 0) {
                 triggerFireShotSequence(player, ballObj);
                 return;
@@ -1571,7 +1638,7 @@
             else if (type === 'FIRE') {
                 giantSound.play().catch(()=>{});
                 player.fireMultiBallTimer = 600; // 10초
-                showItemNotice(`🔥 불꽃 슛 장전! 스매시를 날려라! 🔥`);
+                showItemNotice(`🔥 불꽃 아이템 획득! (S키: 필살기) 🔥`);
             }
         }
 
@@ -1628,9 +1695,20 @@
                 hitStopTimer--;
             }
 
+            // [카메라 업데이트]
+            if(gameStarted) {
+                camera.update(ball);
+            }
+
             let shakeX = 0; let shakeY = 0;
             if (shakeDuration > 0) { shakeX = (Math.random() - 0.5) * 10; shakeY = (Math.random() - 0.5) * 10; shakeDuration--; }
-            ctx.save(); ctx.translate(shakeX, shakeY);
+            
+            // ★ [카메라 적용 시작]
+            // 화면 전체를 지웁니다.
+            ctx.clearRect(0, 0, 1400, 800);
+            ctx.save(); 
+            ctx.translate(shakeX, shakeY); // 쉐이크 적용
+            camera.apply(ctx); // 카메라 줌/이동 적용
             
             if (images.bg && images.bg.complete) { ctx.drawImage(images.bg, 0, 0, 1400, 800); } 
             else { ctx.fillStyle = "#1e3c72"; ctx.fillRect(0, 0, 1400, 800); }
@@ -1732,6 +1810,7 @@
                 }
             }
 
+            // ★ [카메라 적용 끝 - UI는 줌인 되지 않게 여기서 restore]
             ctx.restore();
 
             if (gameState === 'countdown' && countdownText !== "") {
