@@ -1197,7 +1197,7 @@
 
         window.onkeydown = (e) => {
             keys[e.code] = true;
-            if (isGameOver && e.code === 'Enter') window.location.href = 'game_select.html';
+            if (isGameOver && e.code === 'Enter') window.location.href = 'index.html';
 
             if (!isGameOver && gameState === 'playing') {
                 if (e.code === 'Digit1') p1.setEmoji("😜");

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>캐릭터 선택 - 피카츄 배구</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
+
+        body {
+            margin: 0; overflow: hidden; height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-family: 'Black Han Sans', sans-serif;
+            color: white;
+            user-select: none;
+            cursor: none; 
+        }
+
+        .cursor-dot {
+            width: 20px; height: 20px;
+            background: white; border-radius: 50%;
+            position: absolute; pointer-events: none;
+            z-index: 9999;
+            box-shadow: 0 0 10px #fff, 0 0 20px #ff00de;
+            transition: transform 0.1s;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #bgCanvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
+        }
+
+        .container {
+            z-index: 10;
+            text-align: center;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        h1 {
+            font-size: 4.5rem; margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de, 0 0 40px #ff00de;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de; }
+            to { text-shadow: 0 0 20px #fff, 0 0 30px #ff00de, 0 0 40px #ff00de, 0 0 50px #ff00de; }
+        }
+
+        /* 모드 선택 버튼 스타일 */
+        .mode-switch {
+            display: flex; gap: 20px; margin-bottom: 20px;
+            background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 20px;
+        }
+        .mode-btn {
+            font-size: 1.5rem; padding: 10px 20px;
+            border: 2px solid #555; border-radius: 10px;
+            background: rgba(255,255,255,0.1); cursor: none;
+            color: #aaa; transition: all 0.2s;
+        }
+        .mode-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+        .mode-btn.active {
+            border-color: #00FF00; background: rgba(0, 255, 0, 0.2);
+            color: #00FF00; text-shadow: 0 0 10px #00FF00;
+            transform: scale(1.1); font-weight: bold;
+        }
+
+        .status {
+            font-size: 2.2rem; margin-bottom: 20px;
+            color: #00d2ff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.4);
+            padding: 10px 30px; border-radius: 30px;
+            border: 2px solid rgba(0, 210, 255, 0.5);
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .char-grid {
+            display: flex; gap: 30px;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+        
+        .char-card {
+            width: 200px; height: 280px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            cursor: pointer; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        
+        .char-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            border-color: #ffe53b;
+            box-shadow: 0 0 30px rgba(255, 229, 59, 0.6);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .char-card.selected { filter: grayscale(0.5); pointer-events: none; }
+        .char-card.selected.p1-border { border-color: #00d2ff; box-shadow: 0 0 30px rgba(0, 210, 255, 0.6); }
+        .char-card.selected.p2-border { border-color: #ff5e62; box-shadow: 0 0 30px rgba(255, 94, 98, 0.6); }
+        
+        .preview {
+            width: 140px; height: 140px;
+            background-repeat: no-repeat;
+            background-size: 700px 140px; 
+            margin-bottom: 25px;
+            filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.5));
+            transition: transform 0.2s;
+        }
+
+        .random-icon {
+            font-size: 8rem; color: #ffeb3b;
+            text-shadow: 0 0 20px #ff0000;
+            margin-bottom: 10px;
+            animation: bounce 1s infinite;
+            display: block; 
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .char-card:hover .preview { transform: scale(1.1) rotate(5deg); }
+        .name { font-size: 1.8rem; color: #fff; text-shadow: 2px 2px 0 #000; }
+
+        .badge {
+            position: absolute; top: 10px; right: 10px;
+            padding: 5px 10px; border-radius: 10px;
+            font-size: 1.2rem; font-weight: bold;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            transform: rotate(15deg);
+        }
+        .badge.p1 { background: #00d2ff; color: white; display: block; border: 2px solid white; }
+        .badge.p2 { background: #ff5e62; color: white; display: block; border: 2px solid white; }
+
+        .speed-control { margin-top: 10px; text-align: center; }
+        .speed-title { font-size: 1.3rem; color: #FFD700; margin-bottom: 5px; text-shadow: 0 0 10px #FF4500; }
+        .speed-options { display: flex; gap: 10px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 15px; }
+        .speed-btn {
+            padding: 8px 15px; border: 2px solid #555; border-radius: 10px;
+            background: rgba(255,255,255,0.1); cursor: none;
+            color: #aaa; font-size: 1.1rem; transition: all 0.2s;
+        }
+        .speed-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+        .speed-btn.active {
+            border-color: #00FFFF; background: rgba(0, 255, 255, 0.3);
+            color: #00FFFF; text-shadow: 0 0 10px #00FFFF;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: scale(1.1); font-weight: bold;
+        }
+
+        .guide-btn {
+            margin-top: 20px; padding: 10px 30px; font-size: 1.5rem;
+            background: linear-gradient(45deg, #ff00cc, #333399);
+            border: 2px solid #fff; border-radius: 30px; color: white; cursor: none;
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.6); transition: transform 0.2s;
+            animation: pulseBtn 2s infinite;
+        }
+        .guide-btn:hover { transform: scale(1.1); }
+        @keyframes pulseBtn {
+            0% { box-shadow: 0 0 20px rgba(255, 0, 204, 0.6); }
+            50% { box-shadow: 0 0 40px rgba(255, 0, 204, 1); }
+            100% { box-shadow: 0 0 20px rgba(255, 0, 204, 0.6); }
+        }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+            z-index: 100; justify-content: center; align-items: center; cursor: auto;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 3px solid #00d2ff; border-radius: 20px;
+            padding: 30px; width: 1100px;
+            max-width: 95%;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.5); text-align: center; position: relative;
+        }
+        .modal-title {
+            font-size: 3rem; 
+            color: #fff; margin-bottom: 20px;
+            text-shadow: 0 0 10px #00d2ff; border-bottom: 2px solid rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+        }
+        .item-list { 
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: left; 
+        }
+        .item-category { margin-bottom: 20px; }
+        .cat-title { 
+            font-size: 1.8rem; 
+            margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; 
+        }
+        .cat-buff { color: #00FF00; text-shadow: 0 0 5px #00FF00; }
+        .cat-trap { color: #FF0000; text-shadow: 0 0 5px #FF0000; }
+        .cat-special { color: #FFD700; text-shadow: 0 0 5px #FFD700; } 
+        
+        .item-row { 
+            display: flex; align-items: center; 
+            font-size: 1.3rem; 
+            margin-bottom: 10px; 
+            background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 10px;
+        }
+        .item-icon { 
+            font-size: 2.2rem; 
+            margin-right: 15px; width: 40px; text-align: center; 
+        }
+        .item-desc { 
+            color: #ddd; 
+            font-size: 1.1rem; 
+        }
+        .close-btn {
+            position: absolute; top: 15px; right: 20px;
+            font-size: 2.5rem; 
+            color: #fff; cursor: pointer; transition: color 0.2s;
+        }
+        .close-btn:hover { color: #ff0055; }
+
+        .footer { margin-top: 20px; font-size: 1.1rem; color: rgba(255,255,255,0.6); }
+    </style>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+    
+    <div class="cursor-dot" id="cursorDot"></div>
+
+    <div class="modal-overlay" id="itemModal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <div class="close-btn" onclick="toggleModal()">×</div>
+            <div class="modal-title">✨ 아이템 도감 ✨</div>
+            <div class="item-list">
+                <div class="item-column">
+                    <div class="item-category">
+                        <div class="cat-title cat-buff">=== 버프 (BUFF) ===</div>
+                        <div class="item-row"><span class="item-icon">⚡</span><span class="item-desc"><b>스피드</b>: 이동 속도 UP!</span></div>
+                        <div class="item-row"><span class="item-icon">🚀</span><span class="item-desc"><b>점프</b>: 슈퍼 하이 점프!</span></div>
+                        <div class="item-row"><span class="item-icon">🍄</span><span class="item-desc"><b>거인</b>: 내 몸이 커져요!</span></div>
+                        <div class="item-row"><span class="item-icon">👶</span><span class="item-desc"><b>난쟁이</b>: 상대방을 작게!</span></div>
+                        <div class="item-row"><span class="item-icon">❄️</span><span class="item-desc"><b>얼음</b>: 상대를 얼려요!</span></div>
+                        <div class="item-row"><span class="item-icon">😵</span><span class="item-desc"><b>혼란</b>: 상대 키 반전!</span></div>
+                    </div>
+                </div>
+                
+                <div class="item-column">
+                    <div class="item-category">
+                        <div class="cat-title cat-trap">=== 함정 (TRAP) ===</div>
+                        <div class="item-row"><span class="item-icon">🍌</span><span class="item-desc"><b>바나나</b>: 꽈당! 미끄러짐</span></div>
+                        <div class="item-row"><span class="item-icon">💩</span><span class="item-desc"><b>똥</b>: 냄새나서 느려짐</span></div>
+                        <div class="item-row"><span class="item-icon">💣</span><span class="item-desc"><b>시한폭탄</b>: 쾅! 기절 & 날아감</span></div>
+                        <div class="item-row"><span class="item-icon">🌑</span><span class="item-desc"><b>정전</b>: 화면이 캄캄해짐</span></div>
+                        <div class="item-row"><span class="item-icon">🌪️</span><span class="item-desc"><b>태풍</b>: 바람이 불어 밀려남</span></div>
+                        <div class="item-row"><span class="item-icon">🦑</span><span class="item-desc"><b>오징어 먹물</b>: 화면을 가려요!</span></div>
+                    </div>
+                </div>
+
+                <div class="item-column">
+                    <div class="item-category">
+                        <div class="cat-title cat-special">=== 스페셜 (SPECIAL) ===</div>
+                        <div class="item-row"><span class="item-icon">🏐</span><span class="item-desc"><b>빅볼</b>: 공이 2배~3배 커짐!</span></div>
+                        <div class="item-row"><span class="item-icon">💎</span><span class="item-desc"><b>보너스</b>: 점수 +1점 획득!</span></div>
+                        <div class="item-row"><span class="item-icon">👻</span><span class="item-desc"><b>유령공</b>: 공이 투명해짐!</span></div>
+                        <div class="item-row"><span class="item-icon">🤥</span><span class="item-desc"><b>분신술</b>: 가짜 공들이 튀어나옴!</span></div>
+                        <div class="item-row"><span class="item-icon">🧱</span><span class="item-desc"><b>철벽</b>: 네트가 높아져 방어!</span></div>
+                        <div class="item-row"><span class="item-icon">🐔</span><span class="item-desc"><b>꼬꼬댁 변신</b>: 3마리 군단! 득점 시 2점!</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top:20px; border-top:1px solid #555; padding-top:15px;">
+                <div style="font-size:1.5rem; color:#FFD700; margin-bottom:10px;">🎮 이모티콘 조작키 🎮</div>
+                <div style="display:flex; justify-content:space-around; text-align:left; font-size:1.1rem; color:#ddd;">
+                    <div>
+                        <div style="color:#00d2ff; font-weight:bold; margin-bottom:5px;">Player 1</div>
+                        <div>[1] : 😜 메롱</div>
+                        <div>[2] : 😡 버럭</div>
+                        <div>[3] : 😱 으악</div>
+                        <div>[4] : 💩 똥!</div>
+                    </div>
+                    <div>
+                        <div style="color:#ff5e62; font-weight:bold; margin-bottom:5px;">Player 2</div>
+                        <div>[ ㅡ ] : 😜 메롱</div>
+                        <div>[ , ] : 😡 버럭</div>
+                        <div>[ . ] : 😱 으악</div>
+                        <div>[ / ] : 💩 똥!</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:20px; border-top:1px solid #555; padding-top:15px;">
+                <div style="font-size:1.5rem; color:#FFD700; margin-bottom:10px;">🔥 스매시 가이드 🔥</div>
+                <div style="text-align:left; font-size:1.1rem; color:#ddd; line-height:1.6; padding:0 20px;">
+                    <div style="margin-bottom:10px;">
+                        <span style="color:#00d2ff; font-weight:bold; font-size:1.2rem;">⚡ 일반 스매시:</span> 
+                        상대방이 그냥 몸으로 받거나 슬라이딩해서 받아낼 수 있습니다.
+                    </div>
+                    <div>
+                        <span style="color:#ff5e62; font-weight:bold; font-size:1.2rem;">🔥 불꽃슛 (슈퍼 스매시):</span> 
+                        상대방이 타이밍을 정확히 맞춰서 <b style="color:#fff; border-bottom:1px solid #fff;">스매시 키(방어)</b>를 누르지 않으면 받아낼 수 없습니다.<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;그냥 몸으로 받으려 하면 <b style="color:red; font-size:1.3rem;">"뚫렸다!!"</b>라는 메시지와 함께 캐릭터가 <b style="color:yellow;">기절(Stun)</b>하고 뒤로 튕겨 나갑니다.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>CHARACTER SELECT</h1>
+        
+        <div class="mode-switch">
+            <div class="mode-btn" id="btn2P" onclick="setGameMode('2p')">2 PLAYERS (vs 친구)</div>
+            <div class="mode-btn" id="btn1P" onclick="setGameMode('ai')">1 PLAYER (vs AI)</div>
+        </div>
+
+        <div class="status" id="statusMsg">PLAYER 1 (왼쪽) 선택하세요</div>
+        
+        <div class="char-grid" id="charGrid"></div>
+
+        <div class="speed-control">
+            <div class="speed-title">GAME SPEED</div>
+            <div class="speed-options">
+                <div class="speed-btn" onclick="selectSpeed(0.7, this)">VERY SLOW</div>
+                <div class="speed-btn" onclick="selectSpeed(0.85, this)">SLOW</div>
+                <div class="speed-btn active" onclick="selectSpeed(1.0, this)">NORMAL</div>
+                <div class="speed-btn" onclick="selectSpeed(1.3, this)">FAST</div>
+                <div class="speed-btn" onclick="selectSpeed(1.6, this)">VERY FAST</div>
+            </div>
+        </div>
+
+        <button class="guide-btn" onclick="toggleModal()">📜 아이템 도감 보기</button>
+
+        <div class="footer">랜덤 선택을 하려면 '?' 카드를 누르세요! (50% 확률로 히든 캐릭터 등장)</div>
+    </div>
+
+    <script>
+        const selectSongs = ['song/select.mp3', 'song/select1.mp3'];
+        const randomSelectIndex = Math.floor(Math.random() * selectSongs.length);
+        const bgMusic = new Audio(selectSongs[randomSelectIndex]);
+        bgMusic.loop = true; bgMusic.volume = 0.5;
+        const randomFinishSound = new Audio('song/ramdom.mp3');
+        const hoverSound = new Audio('song/coin.mp3'); 
+
+        window.addEventListener('load', () => {
+            const playPromise = bgMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    document.body.addEventListener('click', () => {
+                        if(bgMusic.paused) bgMusic.play();
+                    }, { once: true });
+                });
+            }
+            // 기본 모드 설정
+            setGameMode('2p');
+        });
+
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const cursorDot = document.getElementById('cursorDot');
+        const cursorParticles = [];
+        let mouseX = 0, mouseY = 0;
+
+        class CursorSparkle {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.life = 1.0;
+                this.color = `hsl(${Math.random()*360}, 100%, 70%)`;
+                this.size = Math.random() * 5 + 2;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                this.life -= 0.05; this.size *= 0.95;
+            }
+            draw() {
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            cursorDot.style.left = mouseX - 10 + 'px';
+            cursorDot.style.top = mouseY - 10 + 'px';
+            for(let i=0; i<2; i++) { cursorParticles.push(new CursorSparkle(mouseX, mouseY)); }
+        });
+
+        const particles = [];
+        class BgParticle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3;
+                this.speedX = (Math.random() - 0.5) * 1;
+                this.speedY = (Math.random() - 0.5) * 1;
+                this.color = `rgba(${Math.random()*100 + 155}, ${Math.random()*100 + 155}, 255, ${Math.random() * 0.5})`;
+            }
+            update() {
+                this.x += this.speedX; this.y += this.speedY;
+                if(this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if(this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        for(let i=0; i<80; i++) particles.push(new BgParticle());
+        
+        function animateBg() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            for (let i = cursorParticles.length - 1; i >= 0; i--) {
+                cursorParticles[i].update(); cursorParticles[i].draw();
+                if (cursorParticles[i].life <= 0) cursorParticles.splice(i, 1);
+            }
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+
+        let gameSpeedRatio = 1.0;
+        let currentGameMode = '2p'; // '2p' or 'ai'
+
+        function selectSpeed(ratio, btn) {
+            gameSpeedRatio = ratio;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setGameMode(mode) {
+            currentGameMode = mode;
+            if(mode === '2p') {
+                document.getElementById('btn2P').classList.add('active');
+                document.getElementById('btn1P').classList.remove('active');
+                statusMsg.innerHTML = "PLAYER 1 (왼쪽) 선택하세요";
+                statusMsg.style.borderColor = "#00d2ff"; statusMsg.style.color = "#00d2ff";
+            } else {
+                document.getElementById('btn1P').classList.add('active');
+                document.getElementById('btn2P').classList.remove('active');
+                statusMsg.innerHTML = "내 캐릭터 (P1)를 선택하세요 (AI 대전)";
+                statusMsg.style.borderColor = "#00FF00"; statusMsg.style.color = "#00FF00";
+            }
+            // 리셋 로직 필요 시 추가 (선택 초기화 등)
+            resetSelection();
+        }
+
+        function resetSelection() {
+            p1ID = null;
+            document.querySelectorAll('.char-card').forEach(c => {
+                c.classList.remove('selected', 'p1-border', 'p2-border');
+            });
+            document.querySelectorAll('.badge').forEach(b => b.style.display = 'none');
+        }
+
+        function toggleModal() {
+            const modal = document.getElementById('itemModal');
+            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function closeModal(e) {
+            if (e.target.id === 'itemModal') {
+                document.getElementById('itemModal').style.display = 'none';
+            }
+        }
+
+        const CHARACTERS = [
+            { id: 0, name: "다온", src: 'image/TWO.png', frameIndex: 0, hidden: false },
+            { id: 1, name: "유주", src: 'image/TWO.png', frameIndex: 2, hidden: false },
+            { id: 2, name: "엄마", src: 'image/ONE.png', frameIndex: 0, hidden: false },
+            { id: 3, name: "아빠", src: 'image/ONE.png', frameIndex: 2, hidden: false },
+            { id: 4, name: "돈까스할매", src: 'image/Three.png', frameIndex: 0, hidden: true },
+            { id: 5, name: "근육할배", src: 'image/Three.png', frameIndex: 2, hidden: true }
+        ];
+
+        let p1ID = null;
+        let isSpinning = false; 
+        const grid = document.getElementById('charGrid');
+        const statusMsg = document.getElementById('statusMsg');
+
+        function createCard(char) {
+            if (char.hidden) return; 
+            const card = document.createElement('div');
+            card.className = 'char-card';
+            card.id = `card-${char.id}`; 
+            
+            const badge = document.createElement('div');
+            badge.className = 'badge';
+            badge.innerText = "READY";
+            
+            const preview = document.createElement('div');
+            preview.className = 'preview';
+            preview.style.backgroundImage = `url('${char.src}')`;
+            preview.style.backgroundPosition = `-${char.frameIndex * 140}px 0px`; 
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'name';
+            nameDiv.innerText = char.name;
+
+            card.appendChild(badge); card.appendChild(preview); card.appendChild(nameDiv);
+            
+            card.addEventListener('mouseenter', () => {
+                if(!isSpinning) {
+                    hoverSound.currentTime = 0;
+                    hoverSound.play().catch(()=>{});
+                }
+            });
+
+            card.onclick = () => { if(isSpinning) return; selectChar(char.id, char.name, card, badge); }
+            grid.appendChild(card);
+        }
+        CHARACTERS.forEach(char => createCard(char));
+
+        const randomCard = document.createElement('div');
+        randomCard.className = 'char-card';
+        randomCard.style.borderColor = "#ffeb3b";
+        const randomBadge = document.createElement('div'); randomBadge.className = 'badge';
+        const randomIcon = document.createElement('div'); randomIcon.className = 'random-icon'; randomIcon.innerText = "?";
+        const randomPreview = document.createElement('div'); randomPreview.className = 'preview'; randomPreview.style.display = 'none';
+        const randomName = document.createElement('div'); randomName.className = 'name'; randomName.innerText = "랜덤";
+
+        randomCard.appendChild(randomBadge); randomCard.appendChild(randomIcon); randomCard.appendChild(randomPreview); randomCard.appendChild(randomName);
+
+        randomCard.addEventListener('mouseenter', () => {
+            if(!isSpinning) {
+                hoverSound.currentTime = 0;
+                hoverSound.play().catch(()=>{});
+            }
+        });
+
+        randomCard.onclick = () => {
+            if(isSpinning) return;
+            if(bgMusic.paused) bgMusic.play().catch(()=>{});
+            isSpinning = true;
+            
+            const currentPlayerColor = (p1ID === null) ? "#00d2ff" : "#ff5e62";
+            randomCard.style.borderColor = currentPlayerColor;
+            randomCard.style.boxShadow = `0 0 30px ${currentPlayerColor}`;
+            randomIcon.style.display = 'none';
+            randomPreview.style.display = 'block';
+            randomName.innerText = "추첨중...";
+
+            const spinList = CHARACTERS;
+            let count = 0; let speed = 80; let spinIndex = 0; let maxIterations = 20;
+
+            const spinInterval = setInterval(() => {
+                spinIndex = (spinIndex + 1) % spinList.length;
+                const char = spinList[spinIndex];
+                randomPreview.style.backgroundImage = `url('${char.src}')`;
+                randomPreview.style.backgroundPosition = `-${char.frameIndex * 140}px 0px`;
+                count++;
+                if (count >= maxIterations) { clearInterval(spinInterval); determineResult(); }
+            }, speed);
+        };
+
+        function determineResult() {
+            const rand = Math.random(); 
+            let targetList = [];
+            if (rand < 0.5) targetList = CHARACTERS.filter(c => c.hidden);
+            else targetList = CHARACTERS.filter(c => !c.hidden);
+
+            const pickedChar = targetList[Math.floor(Math.random() * targetList.length)];
+            randomPreview.style.backgroundImage = `url('${pickedChar.src}')`;
+            randomPreview.style.backgroundPosition = `-${pickedChar.frameIndex * 140}px 0px`;
+            randomName.innerText = pickedChar.name;
+
+            if (pickedChar.hidden) { randomName.style.color = "#FFD700"; randomName.style.textShadow = "0 0 10px red"; } 
+            else { randomName.style.color = "white"; randomName.style.textShadow = "2px 2px 0 #000"; }
+            
+            setTimeout(() => {
+                randomFinishSound.play().catch(()=>{});
+                
+                selectChar(pickedChar.id, `랜덤(${pickedChar.name})`, randomCard, randomBadge, true);
+                setTimeout(() => {
+                     isSpinning = false; randomIcon.style.display = 'block'; randomPreview.style.display = 'none';
+                     randomName.innerText = "랜덤"; randomName.style.color = "white"; randomName.style.textShadow = "2px 2px 0 #000";
+                     if (p1ID !== null) randomCard.style.borderColor = "#ff5e62"; else randomCard.style.borderColor = "#ffeb3b";
+                     randomCard.style.boxShadow = "none";
+                }, 1000); 
+            }, 500);
+        }
+        grid.appendChild(randomCard);
+
+        function selectChar(id, name, cardElem, badgeElem, isRandom = false) {
+            if(bgMusic.paused) bgMusic.play().catch(()=>{});
+
+            if (p1ID === null) {
+                // P1 선택
+                p1ID = id;
+                if (!isRandom) { cardElem.classList.add('selected', 'p1-border'); badgeElem.innerText = "P1"; badgeElem.classList.add('p1'); badgeElem.style.display = 'block'; }
+                
+                if (currentGameMode === 'ai') {
+                    // AI 모드면 바로 AI 캐릭터 랜덤 선택 후 시작
+                    statusMsg.innerHTML = `<span style="color:#00d2ff">${name}</span> 선택 완료! <br> <span style="color:#00FF00">상대 AI(CPU)를 불러오는 중...</span>`;
+                    
+                    setTimeout(() => {
+                        // AI는 50% 확률로 히든 포함 랜덤
+                        const rand = Math.random(); 
+                        let targetList = (rand < 0.5) ? CHARACTERS.filter(c => c.hidden) : CHARACTERS.filter(c => !c.hidden);
+                        const aiChar = targetList[Math.floor(Math.random() * targetList.length)];
+                        
+                        window.location.href = `다온.html?p1=${p1ID}&p2=${aiChar.id}&speed=${gameSpeedRatio}&mode=ai`;
+                    }, 1000);
+
+                } else {
+                    // 2인 모드면 P2 선택 대기
+                    statusMsg.innerHTML = `<span style="color:#00d2ff">${name}</span> 선택 완료! <br> <span style="color:#ff5e62">PLAYER 2 (오른쪽) 선택하세요</span>`;
+                    statusMsg.style.borderColor = "#ff5e62"; statusMsg.style.color = "#ff5e62";
+                }
+
+            } else {
+                // P2 선택 (2인 모드일 때만 여기 도달)
+                if (!isRandom) { cardElem.classList.add('selected', 'p2-border'); badgeElem.innerText = "P2"; badgeElem.classList.add('p2'); badgeElem.style.display = 'block'; }
+                statusMsg.innerHTML = `P2: <span style="color:#ff5e62">${name}</span> 선택 완료!<br>GAME STARTING...`;
+                
+                setTimeout(() => {
+                    window.location.href = `다온.html?p1=${p1ID}&p2=${id}&speed=${gameSpeedRatio}&mode=2p`;
+                }, 500); 
+            }
+        }
+    </script>
+</body>
+</html>
